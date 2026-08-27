@@ -2,7 +2,7 @@ import React from 'react';
 import { MapContainer, TileLayer, Circle, Popup, Marker } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { MapPin, AlertOctagon, CheckCircle2, Clock, Truck, Layers, Activity } from 'lucide-react';
-import { SectorZone, LogisticsTask, EmergencyLevel } from '../types';
+import type { SectorZone, LogisticsTask, EmergencyLevel } from '../types';
 
 interface CoordinatorDashboardProps {
   sectors: SectorZone[];
@@ -28,7 +28,7 @@ export const CoordinatorDashboard: React.FC<CoordinatorDashboardProps> = ({
     }
   };
 
-  const centerCoords: [number, number] = [44.515, 38.085];
+  const centerCoords: [number, number] = [25.776, -80.187];
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>

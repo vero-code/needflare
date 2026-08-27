@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ShieldCheck, Wifi, WifiOff, Cpu, RefreshCw, Smartphone } from 'lucide-react';
 import { EdgeGemmaService } from '../services/edgeGemmaService';
-import { RawFieldReport, AnonymizedReport } from '../types';
+import type { RawFieldReport, AnonymizedReport } from '../types';
 
 interface VolunteerEdgeViewProps {
   onSyncBatchToCloud: (reports: AnonymizedReport[]) => void;
@@ -32,7 +32,7 @@ export const VolunteerEdgeView: React.FC<VolunteerEdgeViewProps> = ({ onSyncBatc
       timestamp: Date.now(),
       rawText,
       sectorId,
-      coordinates: { lat: 44.5034 + (Math.random() - 0.5) * 0.01, lng: 38.0863 + (Math.random() - 0.5) * 0.01 },
+      coordinates: { lat: 25.7617 + (Math.random() - 0.5) * 0.01, lng: -80.1918 + (Math.random() - 0.5) * 0.01 },
     };
 
     const anonymized = await EdgeGemmaService.processRawReportOnDevice(rawReport);

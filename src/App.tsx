@@ -5,7 +5,7 @@ import { CoordinatorDashboard } from './components/CoordinatorDashboard';
 import { VeoBroadcastGallery } from './components/VeoBroadcastGallery';
 import { CloudGeminiAgent } from './services/cloudGeminiAgent';
 import { VeoService } from './services/veoService';
-import { SectorZone, LogisticsTask, VeoVisualGuide, AnonymizedReport } from './types';
+import type { SectorZone, LogisticsTask, VeoVisualGuide, AnonymizedReport } from './types';
 
 export function App() {
   const [activeTab, setActiveTab] = useState<'field' | 'coordinator' | 'veo'>('coordinator');

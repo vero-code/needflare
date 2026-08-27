@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Video, Radio, Sparkles, CheckCircle2, PlayCircle, Eye } from 'lucide-react';
-import { VeoVisualGuide, NeedCategory } from '../types';
+import type { VeoVisualGuide, NeedCategory } from '../types';
 import { VeoService } from '../services/veoService';
 
 interface VeoBroadcastGalleryProps {

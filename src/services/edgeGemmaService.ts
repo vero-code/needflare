@@ -1,4 +1,4 @@
-import { RawFieldReport, AnonymizedReport, NeedCategory, EmergencyLevel } from '../types';
+import type { RawFieldReport, AnonymizedReport, NeedCategory, EmergencyLevel } from '../types';
 
 const STORAGE_KEY = 'needflare_offline_reports';
 
@@ -52,7 +52,7 @@ export class EdgeGemmaService {
       id: raw.id || `rep_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
       timestamp: raw.timestamp || Date.now(),
       sectorId: raw.sectorId || 'sector-alpha',
-      coordinates: raw.coordinates || { lat: 44.5034, lng: 38.0863 },
+      coordinates: raw.coordinates || { lat: 25.7617, lng: -80.1918 },
       sanitizedSummary: sanitizedText,
       category,
       estimatedPeopleCount,

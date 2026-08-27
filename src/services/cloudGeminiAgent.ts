@@ -1,12 +1,12 @@
-import { AnonymizedReport, SectorZone, LogisticsTask, VeoVisualGuide, NeedCategory, EmergencyLevel } from '../types';
+import type { AnonymizedReport, SectorZone, LogisticsTask, VeoVisualGuide, NeedCategory, EmergencyLevel } from '../types';
 
 export class CloudGeminiAgent {
   public static initialSectors: SectorZone[] = [
     {
       id: 'sector-alpha',
-      name: 'Sector Alpha (Coastal area)',
-      coordinates: { lat: 44.5034, lng: 38.0863 },
-      radiusMeters: 850,
+      name: 'Sector Alpha (Biscayne Coastal Shore)',
+      coordinates: { lat: 25.7617, lng: -80.1918 },
+      radiusMeters: 950,
       emergencyLevel: 'critical',
       totalReportsCount: 14,
       dominantNeeds: ['water', 'rescue'],
@@ -14,9 +14,9 @@ export class CloudGeminiAgent {
     },
     {
       id: 'sector-bravo',
-      name: 'Sector Bravo (Central area)',
-      coordinates: { lat: 44.5160, lng: 38.0720 },
-      radiusMeters: 600,
+      name: 'Sector Bravo (Downtown Riverwalk)',
+      coordinates: { lat: 25.7750, lng: -80.1890 },
+      radiusMeters: 750,
       emergencyLevel: 'high',
       totalReportsCount: 9,
       dominantNeeds: ['medical', 'power'],
@@ -24,9 +24,9 @@ export class CloudGeminiAgent {
     },
     {
       id: 'sector-delta',
-      name: 'Sector Delta (Northern industrial zone)',
-      coordinates: { lat: 44.5280, lng: 38.1010 },
-      radiusMeters: 500,
+      name: 'Sector Delta (North Harbor Logistics)',
+      coordinates: { lat: 25.7920, lng: -80.1780 },
+      radiusMeters: 650,
       emergencyLevel: 'medium',
       totalReportsCount: 4,
       dominantNeeds: ['food', 'shelter'],

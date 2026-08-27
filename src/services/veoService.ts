@@ -1,4 +1,4 @@
-import { VeoVisualGuide, NeedCategory } from '../types';
+import type { VeoVisualGuide, NeedCategory } from '../types';
 
 export class VeoService {
   public static initialGuides: VeoVisualGuide[] = [
