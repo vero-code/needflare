@@ -76,7 +76,7 @@ export function App() {
               NeedFlare
             </div>
             <div style={{ fontSize: '0.7rem', color: '#38bdf8', fontWeight: 600 }}>
-              Gemma Edge • Gemini 3.5 Flash • Google Veo
+              Gemma Edge • Gemini 3.7 Flash • Google Veo
             </div>
           </div>
         </div>
@@ -192,7 +192,7 @@ export function App() {
 
       {/* Footer */}
       <footer style={{ background: '#0f172a', borderTop: '1px solid #1e293b', padding: '1rem 2rem', textAlign: 'center', fontSize: '0.8rem', color: '#64748b' }}>
-        NeedFlare System Architecture: Gemma (Offline Edge PII Anonymizer) ➔ Google Cloud Pub/Sub ➔ Gemini 3.5 Flash (Triage & Logistics) ➔ Google Veo (Universal Visual Survival Instructions)
+        NeedFlare System Architecture: Gemma (Offline Edge PII Anonymizer) ➔ Google Cloud Pub/Sub ➔ Gemini 3.7 Flash (Triage & Logistics) ➔ Google Veo (Universal Visual Survival Instructions)
       </footer>
     </div>
   );
