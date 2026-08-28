@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Flame, Smartphone, LayoutDashboard, Video, CloudLightning, Shield } from 'lucide-react';
+import { Flame, Smartphone, LayoutDashboard, Video, CloudLightning, Shield, Underline } from 'lucide-react';
 import { VolunteerEdgeView } from './components/VolunteerEdgeView';
 import { CoordinatorDashboard } from './components/CoordinatorDashboard';
 import { VeoBroadcastGallery } from './components/VeoBroadcastGallery';
@@ -192,7 +192,7 @@ export function App() {
 
       {/* Footer */}
       <footer style={{ background: '#0f172a', borderTop: '1px solid #1e293b', padding: '1rem 2rem', textAlign: 'center', fontSize: '0.8rem', color: '#64748b' }}>
-        NeedFlare System Architecture: Gemma (Offline Edge PII Anonymizer) ➔ Google Cloud Pub/Sub ➔ Gemini 3.7 Flash (Triage & Logistics) ➔ Google Veo (Universal Visual Survival Instructions)
+        © 2026 NeedFlare · Developed by <a style={{ color: '#cbd5e1', textDecoration: 'none' }} target="_blank" rel="noopener noreferrer" href="https://github.com/vero-code">Veronika Kashtanova</a> for <a style={{ color: '#cbd5e1', textDecoration: 'none' }} target="_blank" rel="noopener noreferrer" href="https://devpost.com/software/needflare">All Things Agentic Hackathon</a>
       </footer>
     </div>
   );
