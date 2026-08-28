@@ -89,15 +89,19 @@ export const needflareTriageFlow = ai.defineFlow(
   },
   async (input) => {
     const response = await ai.generate({
-      system: `You are the NeedFlare Emergency Dispatcher Agent powered by Gemini 2.5 Flash.
+      system: `You are the NeedFlare Emergency Dispatcher Agent powered by Gemini 3.7 Flash.
 Your job is to analyze incoming anonymized disaster reports from field volunteers.
 You MUST invoke the appropriate tools:
 1. Always call triageSectorTool to update the sector severity.
 2. If the situation is urgent (critical or high) or involves multiple victims, call createLogisticsTaskTool with an exact calculated payload.
 3. If it requires universal survival guidance (e.g. water purification, trauma wound care, emergency thermal shelter), call triggerVeoVisualGuideTool with a vivid universal visual prompt without words.`,
-      prompt: `Analyze this field report for sector "${input.sectorId}" with estimated ${input.estimatedPeople} people affected:\n"${input.sanitizedReport}"`,
-      tools: [triageSectorTool, createLogisticsTaskTool, triggerVeoVisualGuideTool],
-    });
+
+  prompt: `Analyze this field report for sector "${input.sectorId}" with estimated ${input.estimatedPeople} people affected:
+"${input.sanitizedReport}"`,
+
+  tools: [triageSectorTool, createLogisticsTaskTool, triggerVeoVisualGuideTool],
+});
+
 
     return {
       agentReasoning: response.text,
