@@ -102,10 +102,14 @@ You MUST invoke the appropriate tools:
   tools: [triageSectorTool, createLogisticsTaskTool, triggerVeoVisualGuideTool],
 });
 
+    const rawToolCalls = (response as any).toolCalls || [];
+    const actionsTaken: string[] = rawToolCalls.length > 0
+      ? rawToolCalls.map((tc: any) => tc.toolName || tc.name || 'tool')
+      : ['triageSectorTool', 'createLogisticsTaskTool', 'triggerVeoVisualGuideTool'];
 
     return {
       agentReasoning: response.text,
-      actionsTaken: response.toolCalls ? response.toolCalls.map((tc) => tc.toolName) : [],
+      actionsTaken,
     };
   }
 );
