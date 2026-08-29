@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { ShieldCheck, Wifi, WifiOff, Cpu, RefreshCw, Smartphone } from 'lucide-react';
+import { Wifi, WifiOff, Smartphone } from 'lucide-react';
 import { EdgeGemmaService } from '../services/edgeGemmaService';
+import { ReportInputForm } from './ReportInputForm';
+import { ScrubbedReportCard } from './ScrubbedReportCard';
+import { OfflineQueueList } from './OfflineQueueList';
 import type { RawFieldReport, AnonymizedReport } from '../types';
 
 interface VolunteerEdgeViewProps {
@@ -47,7 +50,6 @@ export const VolunteerEdgeView: React.FC<VolunteerEdgeViewProps> = ({ onSyncBatc
     const queuedReports = offlineQueue.filter((r) => r.syncStatus === 'offline_queued');
     if (queuedReports.length === 0) return;
 
-    // Simulate Google Cloud Pub/Sub publish
     queuedReports.forEach((r) => {
       EdgeGemmaService.updateReportStatus(r.id, 'synced');
     });
@@ -59,7 +61,7 @@ export const VolunteerEdgeView: React.FC<VolunteerEdgeViewProps> = ({ onSyncBatc
 
   return (
     <div style={{ background: '#1e293b', color: '#f8fafc', padding: '1.5rem', borderRadius: '12px', boxShadow: '0 4px 20px rgba(0,0,0,0.3)' }}>
-      {/* Header */}
+      {/* Terminal Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '1px solid #334155', paddingBottom: '0.75rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <div style={{ background: '#3b82f6', padding: '8px', borderRadius: '8px' }}>
@@ -71,7 +73,7 @@ export const VolunteerEdgeView: React.FC<VolunteerEdgeViewProps> = ({ onSyncBatc
           </div>
         </div>
 
-        {/* Network Toggle */}
+        {/* Network Toggle Button */}
         <button
           onClick={() => setIsOnline(!isOnline)}
           style={{
@@ -86,6 +88,7 @@ export const VolunteerEdgeView: React.FC<VolunteerEdgeViewProps> = ({ onSyncBatc
             fontSize: '0.85rem',
             background: isOnline ? '#10b981' : '#64748b',
             color: '#ffffff',
+            transition: 'all 0.15s ease',
           }}
         >
           {isOnline ? <Wifi size={16} /> : <WifiOff size={16} />}
@@ -93,142 +96,28 @@ export const VolunteerEdgeView: React.FC<VolunteerEdgeViewProps> = ({ onSyncBatc
         </button>
       </div>
 
-      {/* Input Form */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <div>
-          <label style={{ display: 'block', fontSize: '0.85rem', color: '#94a3b8', marginBottom: '4px' }}>
-            Disaster Sector:
-          </label>
-          <select
-            value={sectorId}
-            onChange={(e) => setSectorId(e.target.value)}
-            style={{ width: '100%', padding: '8px', borderRadius: '6px', background: '#0f172a', color: '#fff', border: '1px solid #334155' }}
-          >
-            <option value="sector-alpha">Sector Alpha (Coastal Area)</option>
-            <option value="sector-bravo">Sector Bravo (Downtown District)</option>
-            <option value="sector-delta">Sector Delta (North Industrial)</option>
-          </select>
-        </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+        {/* 1. Report Input Form Component */}
+        <ReportInputForm
+          sectorId={sectorId}
+          onSectorChange={setSectorId}
+          rawText={rawText}
+          onRawTextChange={setRawText}
+          onSubmit={handleProcessAndQueue}
+          isProcessing={isProcessingGemma}
+        />
 
-        <div>
-          <label style={{ display: 'block', fontSize: '0.85rem', color: '#94a3b8', marginBottom: '4px' }}>
-            Raw Field Transmission (contains sensitive PII):
-          </label>
-          <textarea
-            rows={3}
-            value={rawText}
-            onChange={(e) => setRawText(e.target.value)}
-            style={{ width: '100%', padding: '10px', borderRadius: '6px', background: '#0f172a', color: '#fff', border: '1px solid #334155', resize: 'vertical' }}
-            placeholder="Type raw field situation with names, phone numbers, and urgent needs..."
-          />
-        </div>
+        {/* 2. Scrubbed Report Preview Card Component */}
+        {lastProcessedReport && <ScrubbedReportCard report={lastProcessedReport} />}
 
-        {/* Action Button */}
-        <button
-          onClick={handleProcessAndQueue}
-          disabled={isProcessingGemma}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px',
-            padding: '12px',
-            borderRadius: '8px',
-            background: isProcessingGemma ? '#64748b' : '#3b82f6',
-            color: '#fff',
-            border: 'none',
-            fontWeight: 600,
-            cursor: isProcessingGemma ? 'not-allowed' : 'pointer',
-          }}
-        >
-          <Cpu size={18} />
-          {isProcessingGemma ? 'Gemma sanitizing & structuring...' : 'Anonymize & Queue on Device (Gemma 3 Edge)'}
-        </button>
-
-        {/* Processed Report Preview */}
-        {lastProcessedReport && (
-          <div style={{ background: '#0f172a', padding: '1rem', borderRadius: '8px', border: '1px solid #22c55e' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#22c55e', marginBottom: '8px', fontWeight: 600 }}>
-              <ShieldCheck size={18} />
-              Gemma On-Device: PII successfully scrubbed!
-            </div>
-            <p style={{ margin: '0 0 6px 0', fontSize: '0.9rem' }}>
-              <strong>Sanitized Summary:</strong> {lastProcessedReport.sanitizedSummary}
-            </p>
-            <div style={{ display: 'flex', gap: '12px', fontSize: '0.8rem', color: '#94a3b8' }}>
-              <span>Category: <strong style={{ color: '#38bdf8' }}>{lastProcessedReport.category.toUpperCase()}</strong></span>
-              <span>Headcount: <strong>{lastProcessedReport.estimatedPeopleCount}</strong></span>
-              <span>Triage Urgency: <strong style={{ color: '#f59e0b' }}>{lastProcessedReport.preliminaryUrgency.toUpperCase()}</strong></span>
-            </div>
-            {lastProcessedReport.piiRemoved.length > 0 && (
-              <div style={{ marginTop: '8px', fontSize: '0.75rem', color: '#ef4444' }}>
-                Locally Redacted PII: {lastProcessedReport.piiRemoved.join(', ')}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Offline Queue Bar */}
-        <div style={{ background: '#0f172a', padding: '1rem', borderRadius: '8px', marginTop: '0.5rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-            <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>
-              On-Device Offline Queue ({offlineQueue.length} reports)
-            </span>
-            <button
-              onClick={handleSyncToCloud}
-              disabled={!isOnline || offlineQueue.filter((r) => r.syncStatus === 'offline_queued').length === 0}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '6px 12px',
-                borderRadius: '6px',
-                background: isOnline && offlineQueue.some((r) => r.syncStatus === 'offline_queued') ? '#10b981' : '#334155',
-                color: '#fff',
-                border: 'none',
-                cursor: isOnline ? 'pointer' : 'not-allowed',
-                fontSize: '0.8rem',
-                fontWeight: 600,
-              }}
-            >
-              <RefreshCw size={14} />
-              Sync to Google Cloud (Pub/Sub)
-            </button>
-          </div>
-
-          <div style={{ maxHeight: '140px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            {offlineQueue.map((rep) => (
-              <div
-                key={rep.id}
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  background: '#1e293b',
-                  padding: '6px 10px',
-                  borderRadius: '4px',
-                  fontSize: '0.8rem',
-                }}
-              >
-                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '70%' }}>
-                  [{rep.category.toUpperCase()}] {rep.sanitizedSummary}
-                </span>
-                <span
-                  style={{
-                    padding: '2px 8px',
-                    borderRadius: '10px',
-                    fontSize: '0.7rem',
-                    background: rep.syncStatus === 'synced' ? '#065f46' : '#9a3412',
-                    color: rep.syncStatus === 'synced' ? '#6ee7b7' : '#fdba74',
-                  }}
-                >
-                  {rep.syncStatus === 'synced' ? 'Synced' : 'Offline Queued'}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
+        {/* 3. Offline Queue Component */}
+        <OfflineQueueList
+          queue={offlineQueue}
+          isOnline={isOnline}
+          onSync={handleSyncToCloud}
+        />
       </div>
     </div>
   );
 };
+
