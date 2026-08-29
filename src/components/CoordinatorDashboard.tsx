@@ -21,9 +21,12 @@ export const CoordinatorDashboard: React.FC<CoordinatorDashboardProps> = ({
       {/* 1. Top Metrics Banner */}
       <MetricsBanner sectors={sectors} tasks={tasks} />
 
-      {/* 2. Main Operations Grid: Map + Logistics Panel */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(450px, 1.15fr) minmax(420px, 1fr)', gap: '1.25rem' }}>
-        <DisasterHeatmap sectors={sectors} />
+      {/* 2. Main Operations Grid: Left (Map with switch) + Right (Old Logistics Stream) */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(450px, 1.18fr) minmax(400px, 1fr)', gap: '1.25rem' }}>
+        {/* Left Block: Map with embedded switcher */}
+        <DisasterHeatmap sectors={sectors} tasks={tasks} />
+
+        {/* Right Block: Single old logistics task stream */}
         <LogisticsTaskStream tasks={tasks} onUpdateTaskStatus={onUpdateTaskStatus} />
       </div>
 
