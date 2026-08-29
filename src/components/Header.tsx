@@ -41,6 +41,7 @@ export const Header: React.FC<HeaderProps> = ({
   onThemeChange,
 }) => {
   const [internalTheme, setInternalTheme] = useState<DisplayTheme>(displayTheme);
+  const currentTheme = displayTheme || internalTheme;
 
   const handleThemeSwitch = (theme: DisplayTheme) => {
     setInternalTheme(theme);
@@ -377,13 +378,13 @@ export const Header: React.FC<HeaderProps> = ({
           >
             <button
               onClick={() => handleThemeSwitch('HIGH_CONTRAST_SOLAR')}
-              title="Solar High-Contrast"
+              title="Solar High-Contrast (Daylight)"
               style={{
                 padding: '5px 7px',
                 borderRadius: '6px',
                 border: 'none',
-                background: internalTheme === 'HIGH_CONTRAST_SOLAR' ? '#3b82f6' : 'transparent',
-                color: internalTheme === 'HIGH_CONTRAST_SOLAR' ? '#ffffff' : '#94a3b8',
+                background: currentTheme === 'HIGH_CONTRAST_SOLAR' ? '#3b82f6' : 'transparent',
+                color: currentTheme === 'HIGH_CONTRAST_SOLAR' ? '#ffffff' : '#94a3b8',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
@@ -394,13 +395,13 @@ export const Header: React.FC<HeaderProps> = ({
 
             <button
               onClick={() => handleThemeSwitch('AMOLED_TACTICAL')}
-              title="Dark OLED Theme"
+              title="AMOLED Tactical Dark"
               style={{
                 padding: '5px 7px',
                 borderRadius: '6px',
                 border: 'none',
-                background: internalTheme === 'AMOLED_TACTICAL' ? '#3b82f6' : 'transparent',
-                color: internalTheme === 'AMOLED_TACTICAL' ? '#ffffff' : '#94a3b8',
+                background: currentTheme === 'AMOLED_TACTICAL' ? '#3b82f6' : 'transparent',
+                color: currentTheme === 'AMOLED_TACTICAL' ? '#ffffff' : '#94a3b8',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
@@ -411,13 +412,13 @@ export const Header: React.FC<HeaderProps> = ({
 
             <button
               onClick={() => handleThemeSwitch('MONOCHROME_EINK')}
-              title="E-Ink Mode"
+              title="Monochrome E-Ink Mode"
               style={{
                 padding: '3px 7px',
                 borderRadius: '6px',
                 border: 'none',
-                background: internalTheme === 'MONOCHROME_EINK' ? '#ffffff' : 'transparent',
-                color: internalTheme === 'MONOCHROME_EINK' ? '#000000' : '#94a3b8',
+                background: currentTheme === 'MONOCHROME_EINK' ? '#ffffff' : 'transparent',
+                color: currentTheme === 'MONOCHROME_EINK' ? '#000000' : '#94a3b8',
                 fontSize: '0.68rem',
                 fontWeight: 800,
                 cursor: 'pointer',

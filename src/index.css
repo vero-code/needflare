@@ -16,6 +16,36 @@ body {
   background: radial-gradient(circle at top, #1e293b 0%, #0b1120 100%);
 }
 
+/* Theme Switcher Styles */
+.app-root {
+  transition: filter 0.3s ease, background-color 0.3s ease;
+}
+
+/* 1. AMOLED Tactical (Default Dark) */
+.theme-amoled_tactical {
+  color-scheme: dark;
+}
+
+/* 2. High Contrast Solar (Daylight / Inverted Light Theme) */
+.theme-high_contrast_solar {
+  filter: invert(0.92) hue-rotate(180deg);
+  background-color: #f1f5f9 !important;
+  color-scheme: light;
+}
+
+/* Protect images, map tiles, and videos from color inversion */
+.theme-high_contrast_solar .leaflet-container,
+.theme-high_contrast_solar img,
+.theme-high_contrast_solar video {
+  filter: invert(1.08) hue-rotate(180deg);
+}
+
+/* 3. Monochrome E-Ink (High Contrast Black & White / Low Power) */
+.theme-monochrome_eink {
+  filter: grayscale(100%) contrast(160%) brightness(1.05);
+  background-color: #000000 !important;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -35,3 +65,4 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #475569;
 }
+

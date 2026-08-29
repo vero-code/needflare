@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { CloudLightning, LayoutDashboard, Smartphone, Video } from 'lucide-react';
-import { Header, type NetworkMode } from './components/Header';
+import { Header, type NetworkMode, type DisplayTheme } from './components/Header';
 import { Footer } from './components/Footer';
 import { PiiInspectorModal } from './components/PiiInspectorModal';
 import { AiFieldCopilotModal } from './components/AiFieldCopilotModal';
@@ -15,6 +15,7 @@ import type { SectorZone, LogisticsTask, VeoVisualGuide, AnonymizedReport } from
 export function App() {
   const [activeTab, setActiveTab] = useState<'field' | 'coordinator' | 'veo'>('coordinator');
   const [networkMode, setNetworkMode] = useState<NetworkMode>('ONLINE_4G');
+  const [displayTheme, setDisplayTheme] = useState<DisplayTheme>('AMOLED_TACTICAL');
   const [pendingQueueCount, setPendingQueueCount] = useState<number>(0);
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
   const [isPiiInspectorOpen, setIsPiiInspectorOpen] = useState<boolean>(false);
@@ -92,7 +93,10 @@ export function App() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <div
+      className={`app-root theme-${displayTheme.toLowerCase()}`}
+      style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}
+    >
       <Header
         networkMode={networkMode}
         onNetworkModeChange={setNetworkMode}
@@ -101,6 +105,8 @@ export function App() {
         onTriggerSync={handleTriggerSync}
         onOpenPiiInspector={() => setIsPiiInspectorOpen(true)}
         onOpenCopilot={() => setIsCopilotOpen(true)}
+        displayTheme={displayTheme}
+        onThemeChange={setDisplayTheme}
       />
 
       {/* Cloud Pub/Sub Notification Toast */}
