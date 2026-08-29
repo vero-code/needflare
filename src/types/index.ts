@@ -69,6 +69,12 @@ export interface LogisticsTask {
   requiredPayload: string; // example: "500l of water"
   status: 'pending' | 'in_route' | 'delivered';
   createdAt: number;
+  assignedSquad?: string;
+  transportMode?: '4x4_TRUCK' | 'BOAT_AMPHIBIOUS' | 'OFFROAD_SQUAD' | 'DRONE_AIRDROP';
+  recommendedRoute?: string;
+  terrainWarning?: string;
+  etaMinutes?: number;
+  payloadItems?: string[];
 }
 
 export interface VeoVisualGuide {

@@ -1,5 +1,16 @@
 ﻿import React, { useState } from 'react';
-import { Layers, CheckCircle } from 'lucide-react';
+import {
+  Layers,
+  CheckCircle,
+  Truck,
+  Anchor,
+  Compass,
+  Wind,
+  AlertTriangle,
+  Clock,
+  Package,
+  Navigation,
+} from 'lucide-react';
 import type { LogisticsTask, EmergencyLevel } from '../types';
 
 interface LogisticsTaskStreamProps {
@@ -26,50 +37,21 @@ export const LogisticsTaskStream: React.FC<LogisticsTaskStreamProps> = ({
     }
   };
 
-  const filteredTasks = tasks.filter((t) => (taskFilter === 'all' ? true : t.status === taskFilter));
-
-  const renderAgentDescription = (text: string) => {
-    if (!text.includes('###') && !text.includes('**')) {
-      return <p style={{ margin: 0, fontSize: '0.85rem', color: '#cbd5e1', lineHeight: '1.4' }}>{text}</p>;
+  const getTransportIcon = (mode?: LogisticsTask['transportMode']) => {
+    switch (mode) {
+      case 'BOAT_AMPHIBIOUS':
+        return <Anchor size={14} color="#06b6d4" />;
+      case 'OFFROAD_SQUAD':
+        return <Compass size={14} color="#f59e0b" />;
+      case 'DRONE_AIRDROP':
+        return <Wind size={14} color="#c084fc" />;
+      case '4x4_TRUCK':
+      default:
+        return <Truck size={14} color="#38bdf8" />;
     }
-
-    const cleanedLines = text
-      .split('\n')
-      .map((l) => l.trim())
-      .filter(Boolean);
-
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '0.82rem' }}>
-        {cleanedLines.map((line, idx) => {
-          if (line.startsWith('###') || line.startsWith('##')) {
-            const headingText = line.replace(/^[#]+\s*/, '');
-            return (
-              <div key={idx} style={{ fontWeight: 700, color: '#f8fafc', fontSize: '0.85rem', marginTop: idx > 0 ? '4px' : 0 }}>
-                {headingText}
-              </div>
-            );
-          }
-
-          if (line.startsWith('-') || line.startsWith('*')) {
-            const itemText = line.replace(/^[-*]\s*/, '').replace(/\*\*(.*?)\*\*/g, '$1');
-            return (
-              <div key={idx} style={{ display: 'flex', gap: '6px', color: '#cbd5e1' }}>
-                <span style={{ color: '#38bdf8' }}>•</span>
-                <span>{itemText}</span>
-              </div>
-            );
-          }
-
-          const formattedLine = line.replace(/\*\*(.*?)\*\*/g, '$1');
-          return (
-            <div key={idx} style={{ color: '#cbd5e1', lineHeight: '1.35' }}>
-              {formattedLine}
-            </div>
-          );
-        })}
-      </div>
-    );
   };
+
+  const filteredTasks = tasks.filter((t) => (taskFilter === 'all' ? true : t.status === taskFilter));
 
   return (
     <div
@@ -85,7 +67,7 @@ export const LogisticsTaskStream: React.FC<LogisticsTaskStreamProps> = ({
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <Layers size={20} color="#f59e0b" />
-          <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: '#f8fafc' }}>
+          <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: '#f8fafc' }}>
             Gemini 3.7 Flash Logistics Stream
           </h3>
         </div>
@@ -106,7 +88,7 @@ export const LogisticsTaskStream: React.FC<LogisticsTaskStreamProps> = ({
               borderRadius: '6px',
               border: 'none',
               fontSize: '0.75rem',
-              fontWeight: 600,
+              fontWeight: 700,
               cursor: 'pointer',
               background: taskFilter === filter ? '#3b82f6' : 'transparent',
               color: taskFilter === filter ? '#fff' : '#94a3b8',
@@ -114,15 +96,15 @@ export const LogisticsTaskStream: React.FC<LogisticsTaskStreamProps> = ({
               transition: 'all 0.15s ease',
             }}
           >
-            {filter.replace('_', ' ')}
+            {filter === 'all' ? `All (${tasks.length})` : filter.replace('_', ' ')}
           </button>
         ))}
       </div>
 
       {/* Task Scroll List */}
-      <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '530px', paddingRight: '4px' }}>
+      <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.9rem', maxHeight: '580px', paddingRight: '4px' }}>
         {filteredTasks.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '2rem', color: '#64748b', fontSize: '0.9rem' }}>
+          <div style={{ textAlign: 'center', padding: '2.5rem', color: '#64748b', fontSize: '0.9rem' }}>
             No tasks found in this category.
           </div>
         ) : (
@@ -141,36 +123,103 @@ export const LogisticsTaskStream: React.FC<LogisticsTaskStreamProps> = ({
                 border: '1px solid #33415550',
               }}
             >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <span style={{ fontWeight: 700, fontSize: '0.95rem', color: '#f8fafc' }}>{task.title}</span>
-                <span
-                  style={{
-                    fontSize: '0.7rem',
-                    padding: '3px 8px',
-                    borderRadius: '4px',
-                    fontWeight: 800,
-                    background: `${getPriorityColor(task.priority)}25`,
-                    color: getPriorityColor(task.priority),
-                  }}
-                >
-                  {task.priority.toUpperCase()}
-                </span>
+              {/* Header: Title + Sector & Priority Badges */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '6px' }}>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '3px' }}>
+                    <span style={{ fontSize: '0.65rem', fontFamily: 'monospace', fontWeight: 800, background: '#1e293b', color: '#38bdf8', padding: '1px 6px', borderRadius: '3px' }}>
+                      {task.id.toUpperCase()}
+                    </span>
+                    <span style={{ fontSize: '0.65rem', fontFamily: 'monospace', fontWeight: 800, background: '#f59e0b20', color: '#fbbf24', padding: '1px 6px', borderRadius: '3px' }}>
+                      SECTOR: {task.sectorId.toUpperCase()}
+                    </span>
+                  </div>
+                  <span style={{ fontWeight: 800, fontSize: '0.95rem', color: '#f8fafc' }}>{task.title}</span>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <span
+                    style={{
+                      fontSize: '0.65rem',
+                      padding: '2px 8px',
+                      borderRadius: '4px',
+                      fontWeight: 800,
+                      background: `${getPriorityColor(task.priority)}25`,
+                      color: getPriorityColor(task.priority),
+                    }}
+                  >
+                    {task.priority.toUpperCase()}
+                  </span>
+
+                  {task.status === 'in_route' && task.etaMinutes && (
+                    <span style={{ fontSize: '0.65rem', display: 'flex', alignItems: 'center', gap: '3px', background: '#0284c720', color: '#38bdf8', padding: '2px 6px', borderRadius: '4px', fontWeight: 700 }}>
+                      <Clock size={11} /> ETA {task.etaMinutes}m
+                    </span>
+                  )}
+                </div>
               </div>
 
-              {/* Structured Agent Output */}
-              <div style={{ background: '#1e293b60', padding: '8px 12px', borderRadius: '6px', border: '1px solid #334155' }}>
-                {renderAgentDescription(task.description)}
+              {/* Rationale / Description */}
+              <p style={{ margin: 0, fontSize: '0.8rem', color: '#cbd5e1', lineHeight: '1.4' }}>
+                <strong style={{ color: '#94a3b8' }}>Rationale:</strong> {task.description}
+              </p>
+
+              {/* Cargo / Allocated Payload Breakdown */}
+              <div style={{ background: '#1e293b70', padding: '8px 10px', borderRadius: '6px', border: '1px solid #334155' }}>
+                <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#38bdf8', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                  <Package size={13} />
+                  CARGO / ALLOCATED PAYLOAD:
+                </div>
+                {task.payloadItems && task.payloadItems.length > 0 ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                    {task.payloadItems.map((item, idx) => (
+                      <div key={idx} style={{ fontSize: '0.75rem', color: '#e2e8f0', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                        <span style={{ color: '#38bdf8' }}>•</span>
+                        <span>{item}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div style={{ fontSize: '0.75rem', color: '#e2e8f0' }}>{task.requiredPayload}</div>
+                )}
               </div>
 
-              <div style={{ fontSize: '0.8rem', color: '#38bdf8', background: '#0369a125', padding: '6px 10px', borderRadius: '6px', border: '1px solid #0284c740' }}>
-                <strong>Allocated Payload:</strong> {task.requiredPayload}
-              </div>
+              {/* Crew & Transport Mode */}
+              {task.assignedSquad && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.74rem', color: '#94a3b8' }}>
+                  {getTransportIcon(task.transportMode)}
+                  <span>
+                    Crew: <strong style={{ color: '#f1f5f9' }}>{task.assignedSquad}</strong>
+                    {task.transportMode ? ` (${task.transportMode.replace('_', ' ')})` : ''}
+                  </span>
+                </div>
+              )}
 
-              {/* Status Switcher */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4px', paddingTop: '6px', borderTop: '1px solid #1e293b' }}>
+              {/* Recommended Corridor & Terrain Warning */}
+              {task.recommendedRoute && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.72rem', color: '#cbd5e1' }}>
+                  <Navigation size={12} color="#f59e0b" />
+                  <span>
+                    Corridor: <strong style={{ color: '#fde68a' }}>{task.recommendedRoute}</strong>
+                  </span>
+                </div>
+              )}
+
+              {task.terrainWarning && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.7rem', color: '#f87171', background: '#ef444415', padding: '4px 8px', borderRadius: '4px', border: '1px solid #ef444430' }}>
+                  <AlertTriangle size={12} />
+                  <span>{task.terrainWarning}</span>
+                </div>
+              )}
+
+              {/* Status Switcher Action Button */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '2px', paddingTop: '6px', borderTop: '1px solid #1e293b' }}>
                 <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
-                  Status: <strong style={{ color: task.status === 'delivered' ? '#34d399' : '#fbbf24' }}>{task.status.replace('_', ' ').toUpperCase()}</strong>
+                  Status: <strong style={{ color: task.status === 'delivered' ? '#34d399' : task.status === 'in_route' ? '#38bdf8' : '#fbbf24' }}>
+                    {task.status === 'delivered' ? 'DELIVERED (CARGO HANDED OVER)' : task.status === 'in_route' ? 'IN ROUTE' : 'PENDING DISPATCH'}
+                  </strong>
                 </span>
+
                 <div style={{ display: 'flex', gap: '4px' }}>
                   {task.status !== 'delivered' && (
                     <button
@@ -178,18 +227,30 @@ export const LogisticsTaskStream: React.FC<LogisticsTaskStreamProps> = ({
                       style={{
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '4px',
-                        padding: '5px 12px',
-                        borderRadius: '5px',
+                        gap: '5px',
+                        padding: '6px 12px',
+                        borderRadius: '6px',
                         border: 'none',
                         background: task.status === 'pending' ? '#3b82f6' : '#10b981',
                         color: '#fff',
                         fontSize: '0.75rem',
-                        fontWeight: 600,
+                        fontWeight: 700,
                         cursor: 'pointer',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                        transition: 'all 0.15s ease',
                       }}
                     >
-                      {task.status === 'pending' ? 'Dispatch Team' : <><CheckCircle size={13} /> Mark Delivered</>}
+                      {task.status === 'pending' ? (
+                        <>
+                          <Truck size={13} />
+                          <span>Accept &amp; Dispatch</span>
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle size={13} />
+                          <span>Confirm Delivery</span>
+                        </>
+                      )}
                     </button>
                   )}
                 </div>
