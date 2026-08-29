@@ -12,6 +12,14 @@ export interface RawFieldReport {
     lat: number;
     lng: number;
   };
+  triageLevel?: EmergencyLevel;
+  peopleCount?: {
+    total: number;
+    infants: number;
+    elderly: number;
+    mobilityImpaired: number;
+  };
+  criticalFlags?: string[];
 }
 
 export interface AnonymizedReport {
@@ -28,6 +36,13 @@ export interface AnonymizedReport {
   preliminaryUrgency: EmergencyLevel;
   piiRemoved: string[]; // List of detected and cut out PII (for security audit)
   syncStatus: SyncStatus;
+  peopleCount?: {
+    total: number;
+    infants: number;
+    elderly: number;
+    mobilityImpaired: number;
+  };
+  criticalFlags?: string[];
 }
 
 export interface SectorZone {

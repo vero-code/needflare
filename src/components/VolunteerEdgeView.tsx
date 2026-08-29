@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Wifi, WifiOff, Smartphone } from 'lucide-react';
 import { EdgeGemmaService } from '../services/edgeGemmaService';
-import { ReportInputForm } from './ReportInputForm';
+import { ReportInputForm, type FormReportPayload } from './ReportInputForm';
 import { ScrubbedReportCard } from './ScrubbedReportCard';
 import { OfflineQueueList } from './OfflineQueueList';
 import type { RawFieldReport, AnonymizedReport } from '../types';
@@ -14,10 +14,6 @@ interface VolunteerEdgeViewProps {
 export const VolunteerEdgeView: React.FC<VolunteerEdgeViewProps> = ({ onSyncBatchToCloud, onQueueChange }) => {
   const [isOnline, setIsOnline] = useState<boolean>(false);
   const [volunteerId] = useState<string>('VOLUNTEER-77-ALPHA');
-  const [sectorId, setSectorId] = useState<string>('sector-alpha');
-  const [rawText, setRawText] = useState<string>(
-    'Citizen Johnathan Miller, phone: +1-555-019-2834, 442 River St. Basement flooded, 6 people trapped including 2 toddlers, urgently need clean drinking water and purification tablets.'
-  );
   const [isProcessingGemma, setIsProcessingGemma] = useState<boolean>(false);
   const [lastProcessedReport, setLastProcessedReport] = useState<AnonymizedReport | null>(null);
   const [offlineQueue, setOfflineQueue] = useState<AnonymizedReport[]>([]);
@@ -26,17 +22,19 @@ export const VolunteerEdgeView: React.FC<VolunteerEdgeViewProps> = ({ onSyncBatc
     setOfflineQueue(EdgeGemmaService.getOfflineQueue());
   }, []);
 
-  const handleProcessAndQueue = async () => {
-    if (!rawText.trim()) return;
+  const handleProcessAndQueue = async (payload: FormReportPayload) => {
     setIsProcessingGemma(true);
 
     const rawReport: RawFieldReport = {
       id: `rep-${Date.now()}`,
       volunteerId,
       timestamp: Date.now(),
-      rawText,
-      sectorId,
+      rawText: payload.rawText,
+      sectorId: payload.sectorId,
       coordinates: { lat: 25.7617 + (Math.random() - 0.5) * 0.01, lng: -80.1918 + (Math.random() - 0.5) * 0.01 },
+      triageLevel: payload.triageLevel,
+      peopleCount: payload.peopleCount,
+      criticalFlags: payload.criticalFlags,
     };
 
     const anonymized = await EdgeGemmaService.processRawReportOnDevice(rawReport);
@@ -99,11 +97,7 @@ export const VolunteerEdgeView: React.FC<VolunteerEdgeViewProps> = ({ onSyncBatc
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
         {/* 1. Report Input Form Component */}
         <ReportInputForm
-          sectorId={sectorId}
-          onSectorChange={setSectorId}
-          rawText={rawText}
-          onRawTextChange={setRawText}
-          onSubmit={handleProcessAndQueue}
+          onSubmitReport={handleProcessAndQueue}
           isProcessing={isProcessingGemma}
         />
 

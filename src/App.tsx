@@ -144,7 +144,7 @@ export function App() {
         )}
 
         {activeTab === 'field' && (
-          <div style={{ maxWidth: '700px', margin: '0 auto' }}>
+          <div style={{ maxWidth: '900px', width: '100%', margin: '0 auto' }}>
             <VolunteerEdgeView
               onSyncBatchToCloud={handleSyncBatchToCloud}
               onQueueChange={refreshPendingCount}

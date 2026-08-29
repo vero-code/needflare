@@ -55,15 +55,67 @@ export class EdgeGemmaService {
       coordinates: raw.coordinates || { lat: 25.7617, lng: -80.1918 },
       sanitizedSummary: sanitizedText,
       category,
-      estimatedPeopleCount,
-      preliminaryUrgency,
+      estimatedPeopleCount: raw.peopleCount?.total || estimatedPeopleCount,
+      preliminaryUrgency: raw.triageLevel || preliminaryUrgency,
       piiRemoved,
       syncStatus: 'offline_queued',
+      peopleCount: raw.peopleCount,
+      criticalFlags: raw.criticalFlags,
     };
 
     this.saveToOfflineQueue(anonymized);
 
     return anonymized;
+  }
+
+  public static scrubPiiRealtime(text: string, sectorCode: string): { scrubbedText: string; redactions: { originalText: string; replacedWith: string; type: string }[] } {
+    const redactions: { originalText: string; replacedWith: string; type: string }[] = [];
+    let scrubbedText = text;
+
+    // 1. Phone numbers
+    const phoneRegex = /(\+?\d{1,3}[-.\s]?)?(\(?\d{3}\)?[-.\s]?)?\d{3}[-.\s]?\d{2}[-.\s]?\d{2}/g;
+    const phoneMatches = scrubbedText.match(phoneRegex);
+    if (phoneMatches) {
+      phoneMatches.forEach((phone) => {
+        if (phone.trim().length > 6) {
+          redactions.push({ originalText: phone.trim(), replacedWith: '[REDACTED_PHONE]', type: 'PHONE' });
+          scrubbedText = scrubbedText.replace(phone, '[REDACTED_PHONE]');
+        }
+      });
+    }
+
+    // 2. Emails
+    const emailRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/gi;
+    const emailMatches = scrubbedText.match(emailRegex);
+    if (emailMatches) {
+      emailMatches.forEach((email) => {
+        redactions.push({ originalText: email.trim(), replacedWith: '[REDACTED_EMAIL]', type: 'EMAIL' });
+        scrubbedText = scrubbedText.replace(email, '[REDACTED_EMAIL]');
+      });
+    }
+
+    // 3. Names with keywords
+    const nameKeywords = /(?:citizen|patient|injured|resident|contact:?|mr\.|mrs\.|ms\.)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/gi;
+    let match;
+    while ((match = nameKeywords.exec(scrubbedText)) !== null) {
+      if (match[1]) {
+        redactions.push({ originalText: match[1].trim(), replacedWith: '[REDACTED_NAME]', type: 'NAME' });
+        scrubbedText = scrubbedText.replace(match[1], '[REDACTED_NAME]');
+      }
+    }
+
+    // 4. Exact street address & apartment numbers
+    const addressRegex = /(\b\d{1,5}\s+[A-Za-z0-9\s.,]+(?:St|Street|Ave|Avenue|Rd|Road|Blvd|Boulevard|Dr|Drive|Way|Lane|Apt|Suite)\b)/gi;
+    const addressMatches = scrubbedText.match(addressRegex);
+    if (addressMatches) {
+      const snapLabel = `[SECTOR_${sectorCode.toUpperCase()}_SNAP]`;
+      addressMatches.forEach((addr) => {
+        redactions.push({ originalText: addr.trim(), replacedWith: snapLabel, type: 'ADDRESS' });
+        scrubbedText = scrubbedText.replace(addr, snapLabel);
+      });
+    }
+
+    return { scrubbedText, redactions };
   }
 
   private static detectCategory(text: string): NeedCategory {
