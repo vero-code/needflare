@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Wifi, WifiOff, Smartphone, Radio } from 'lucide-react';
+import { Wifi, WifiOff, Smartphone, Radio, UserCircle2 } from 'lucide-react';
 import { EdgeGemmaService } from '../services/edgeGemmaService';
 import { ReportInputForm, type FormReportPayload } from './ReportInputForm';
 import { ScrubbedReportCard } from './ScrubbedReportCard';
 import { OfflineQueueList } from './OfflineQueueList';
 import type { RawFieldReport, AnonymizedReport, NetworkMode } from '../types';
+
+const CALLSIGN_KEY = 'needflare_callsign';
 
 interface VolunteerEdgeViewProps {
   networkMode: NetworkMode;
@@ -17,7 +19,10 @@ export const VolunteerEdgeView: React.FC<VolunteerEdgeViewProps> = ({
   onSyncBatchToCloud,
   onQueueChange,
 }) => {
-  const [volunteerId] = useState<string>('VOLUNTEER-77-ALPHA');
+  const [volunteerId, setVolunteerId] = useState<string>(
+    () => sessionStorage.getItem(CALLSIGN_KEY) || ''
+  );
+  const [callsignInput, setCallsignInput] = useState<string>('');
   const [isProcessingGemma, setIsProcessingGemma] = useState<boolean>(false);
   const [lastProcessedReport, setLastProcessedReport] = useState<AnonymizedReport | null>(null);
   const [offlineQueue, setOfflineQueue] = useState<AnonymizedReport[]>([]);
@@ -25,6 +30,49 @@ export const VolunteerEdgeView: React.FC<VolunteerEdgeViewProps> = ({
   useEffect(() => {
     setOfflineQueue(EdgeGemmaService.getOfflineQueue());
   }, []);
+
+  const handleSetCallsign = () => {
+    const trimmed = callsignInput.trim().toUpperCase().replace(/[^A-Z0-9-_]/g, '');
+    if (!trimmed) return;
+    sessionStorage.setItem(CALLSIGN_KEY, trimmed);
+    setVolunteerId(trimmed);
+  };
+
+  // ── Callsign Setup Screen ────────────────────────────────────────────────────
+  if (!volunteerId) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '70vh', padding: '2rem' }}>
+        <div style={{ background: '#1e293b', color: '#f8fafc', padding: '3rem 2rem', borderRadius: '12px', boxShadow: '0 4px 20px rgba(0,0,0,0.3)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem', maxWidth: '440px', width: '100%' }}>
+          <div style={{ background: '#3b82f620', padding: '16px', borderRadius: '50%' }}>
+            <UserCircle2 size={40} color="#60a5fa" />
+          </div>
+          <div style={{ textAlign: 'center' }}>
+            <h2 style={{ margin: '0 0 6px', fontSize: '1.2rem', fontWeight: 700 }}>Volunteer Identification</h2>
+            <p style={{ margin: 0, fontSize: '0.85rem', color: '#94a3b8' }}>Enter your field callsign before submitting reports. This session ID will be attached to all triage packets.</p>
+          </div>
+          <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
+            <input
+              id="callsign-input"
+              type="text"
+              value={callsignInput}
+              onChange={e => setCallsignInput(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleSetCallsign()}
+              placeholder="e.g. ALPHA-99 or DELTA-07"
+              style={{ flex: 1, background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', color: '#f8fafc', padding: '10px 14px', fontSize: '0.95rem', fontFamily: 'monospace', outline: 'none' }}
+              autoFocus
+            />
+            <button
+              onClick={handleSetCallsign}
+              style={{ background: '#3b82f6', border: 'none', borderRadius: '8px', color: '#fff', padding: '10px 18px', fontWeight: 700, cursor: 'pointer', fontSize: '0.9rem' }}
+            >
+              Confirm
+            </button>
+          </div>
+          <p style={{ margin: 0, fontSize: '0.75rem', color: '#64748b' }}>Stored in session only — cleared on browser close</p>
+        </div>
+      </div>
+    );
+  }
 
   const handleProcessAndQueue = async (payload: FormReportPayload) => {
     setIsProcessingGemma(true);
@@ -71,7 +119,7 @@ export const VolunteerEdgeView: React.FC<VolunteerEdgeViewProps> = ({
           </div>
           <div>
             <h2 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 600 }}>Gemma Edge: Field Volunteer Terminal</h2>
-            <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>On-Device Local Inference (Offline / Zero-Cloud PII)</span>
+            <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>On-Device Local Inference (Offline / Zero-Cloud PII) · ID: <strong style={{ color: '#60a5fa', fontFamily: 'monospace' }}>{volunteerId}</strong></span>
           </div>
         </div>
 
