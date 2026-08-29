@@ -40,9 +40,13 @@ export function App() {
     refreshPendingCount();
   }, []);
 
-  // Load tasks from Firestore via Cloud Run on startup
+  const [serverReports, setServerReports] = useState<AnonymizedReport[]>([]);
+
+  // Load tasks and reports from Firestore via Cloud Run on startup
   useEffect(() => {
     const AGENT_URL = (import.meta as any).env?.VITE_AGENT_URL || 'http://localhost:8080';
+    
+    // Fetch tasks
     fetch(`${AGENT_URL}/api/tasks`)
       .then(r => r.json())
       .then(data => {
@@ -55,7 +59,26 @@ export function App() {
         }
       })
       .catch(() => console.warn('⚠️ Could not load tasks from Cloud Run — using defaults'));
+
+    // Fetch reports
+    fetch(`${AGENT_URL}/api/reports`)
+      .then(r => r.json())
+      .then(data => {
+        if (Array.isArray(data.reports) && data.reports.length > 0) {
+          setServerReports(data.reports);
+          console.log(`✅ Loaded ${data.reports.length} report(s) from Firestore`);
+        }
+      })
+      .catch(() => console.warn('⚠️ Could not load reports from Cloud Run — using local queue'));
   }, []);
+
+  // Merge server reports + local offline queue reports (deduplicate by id)
+  const allReports = React.useMemo(() => {
+    const map = new Map<string, AnonymizedReport>();
+    serverReports.forEach(r => map.set(r.id, r));
+    offlineReports.forEach(r => map.set(r.id, r));
+    return Array.from(map.values());
+  }, [serverReports, offlineReports]);
 
   // Handle synchronization of reports from volunteers to Cloud Agent
   const handleSyncBatchToCloud = async (reports: AnonymizedReport[]) => {
@@ -184,7 +207,7 @@ export function App() {
           <CoordinatorDashboard
             sectors={sectors}
             tasks={tasks}
-            reports={offlineReports}
+            reports={allReports}
             onUpdateTaskStatus={handleUpdateTaskStatus}
           />
         )}
