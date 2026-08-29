@@ -1,14 +1,19 @@
 ﻿import React from 'react';
-import { LayoutDashboard, Smartphone, Video } from 'lucide-react';
+import { LayoutDashboard, Smartphone, Video, Radio } from 'lucide-react';
 
-export type MainTab = 'field' | 'coordinator' | 'veo';
+export type MainTab = 'field' | 'coordinator' | 'buffer' | 'veo';
 
 interface NavigationTabsProps {
   activeTab: MainTab;
   onTabChange: (tab: MainTab) => void;
+  pendingQueueCount?: number;
 }
 
-export const NavigationTabs: React.FC<NavigationTabsProps> = ({ activeTab, onTabChange }) => {
+export const NavigationTabs: React.FC<NavigationTabsProps> = ({
+  activeTab,
+  onTabChange,
+  pendingQueueCount = 0,
+}) => {
   return (
     <div
       style={{
@@ -70,6 +75,43 @@ export const NavigationTabs: React.FC<NavigationTabsProps> = ({ activeTab, onTab
         </button>
 
         <button
+          onClick={() => onTabChange('buffer')}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '10px 18px',
+            borderRadius: '8px',
+            border: 'none',
+            fontSize: '0.9rem',
+            fontWeight: 700,
+            cursor: 'pointer',
+            background: activeTab === 'buffer' ? '#f59e0b' : '#0f172a',
+            color: activeTab === 'buffer' ? '#000' : '#94a3b8',
+            boxShadow: activeTab === 'buffer' ? '0 2px 8px rgba(245,158,11,0.35)' : 'none',
+            transition: 'all 0.2s ease',
+          }}
+        >
+          <Radio size={18} />
+          Offline Buffer &amp; P2P
+          {pendingQueueCount > 0 && (
+            <span
+              style={{
+                background: activeTab === 'buffer' ? '#000' : '#f59e0b',
+                color: activeTab === 'buffer' ? '#f59e0b' : '#000',
+                fontSize: '0.7rem',
+                fontWeight: 900,
+                padding: '2px 7px',
+                borderRadius: '10px',
+                marginLeft: '2px',
+              }}
+            >
+              {pendingQueueCount}
+            </span>
+          )}
+        </button>
+
+        <button
           onClick={() => onTabChange('veo')}
           style={{
             display: 'flex',
@@ -99,6 +141,8 @@ export const NavigationTabs: React.FC<NavigationTabsProps> = ({ activeTab, onTab
             ? 'HQ Coordination'
             : activeTab === 'field'
             ? 'Field Terminal (Offline Ready)'
+            : activeTab === 'buffer'
+            ? 'Store & Forward Mesh Relay'
             : 'Universal Broadcast'}
         </span>
       </div>

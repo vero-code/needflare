@@ -8,16 +8,18 @@ import { AiFieldCopilotModal } from './components/AiFieldCopilotModal';
 import { VolunteerEdgeView } from './components/VolunteerEdgeView';
 import { CoordinatorDashboard } from './components/CoordinatorDashboard';
 import { VeoBroadcastGallery } from './components/VeoBroadcastGallery';
+import { OfflineSyncQueue } from './components/OfflineSyncQueue';
 import { CloudGeminiAgent } from './services/cloudGeminiAgent';
 import { VeoService } from './services/veoService';
 import { EdgeGemmaService } from './services/edgeGemmaService';
 import type { SectorZone, LogisticsTask, VeoVisualGuide, AnonymizedReport } from './types';
 
 export function App() {
-  const [activeTab, setActiveTab] = useState<'field' | 'coordinator' | 'veo'>('coordinator');
+  const [activeTab, setActiveTab] = useState<MainTab>('coordinator');
   const [networkMode, setNetworkMode] = useState<NetworkMode>('ONLINE_4G');
   const [displayTheme, setDisplayTheme] = useState<DisplayTheme>('AMOLED_TACTICAL');
   const [pendingQueueCount, setPendingQueueCount] = useState<number>(0);
+  const [offlineReports, setOfflineReports] = useState<AnonymizedReport[]>([]);
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
   const [isPiiInspectorOpen, setIsPiiInspectorOpen] = useState<boolean>(false);
   const [isCopilotOpen, setIsCopilotOpen] = useState<boolean>(false);
@@ -30,6 +32,7 @@ export function App() {
     const queue = EdgeGemmaService.getOfflineQueue();
     const count = queue.filter((r) => r.syncStatus === 'offline_queued').length;
     setPendingQueueCount(count);
+    setOfflineReports(queue);
   };
 
   useEffect(() => {
@@ -134,7 +137,12 @@ export function App() {
       <main style={{ flex: 1, padding: '1.5rem 2rem 2rem 2rem', maxWidth: '1400px', width: '100%', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
         
         {/* Primary Navigation Tabs */}
-        <NavigationTabs activeTab={activeTab} onTabChange={setActiveTab} />
+        <NavigationTabs
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          pendingQueueCount={pendingQueueCount}
+        />
+
         {activeTab === 'coordinator' && (
           <CoordinatorDashboard
             sectors={sectors}
@@ -150,6 +158,16 @@ export function App() {
               onQueueChange={refreshPendingCount}
             />
           </div>
+        )}
+
+        {activeTab === 'buffer' && (
+          <OfflineSyncQueue
+            reports={offlineReports}
+            networkMode={networkMode}
+            isSyncing={isSyncing}
+            onTriggerSync={handleTriggerSync}
+            onRefreshReports={refreshPendingCount}
+          />
         )}
 
         {activeTab === 'veo' && (
