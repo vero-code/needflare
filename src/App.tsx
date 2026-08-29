@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { CloudLightning, LayoutDashboard, Smartphone, Video } from 'lucide-react';
-import { Header } from './components/Header';
+import { Header, type NetworkMode } from './components/Header';
 import { Footer } from './components/Footer';
+import { PiiInspectorModal } from './components/PiiInspectorModal';
+import { AiFieldCopilotModal } from './components/AiFieldCopilotModal';
 import { VolunteerEdgeView } from './components/VolunteerEdgeView';
 import { CoordinatorDashboard } from './components/CoordinatorDashboard';
 import { VeoBroadcastGallery } from './components/VeoBroadcastGallery';
@@ -11,6 +13,9 @@ import type { SectorZone, LogisticsTask, VeoVisualGuide, AnonymizedReport } from
 
 export function App() {
   const [activeTab, setActiveTab] = useState<'field' | 'coordinator' | 'veo'>('coordinator');
+  const [networkMode, setNetworkMode] = useState<NetworkMode>('ONLINE_4G');
+  const [isPiiInspectorOpen, setIsPiiInspectorOpen] = useState<boolean>(false);
+  const [isCopilotOpen, setIsCopilotOpen] = useState<boolean>(false);
   const [sectors, setSectors] = useState<SectorZone[]>(CloudGeminiAgent.initialSectors);
   const [tasks, setTasks] = useState<LogisticsTask[]>(CloudGeminiAgent.initialTasks);
   const [guides, setGuides] = useState<VeoVisualGuide[]>(VeoService.initialGuides);
@@ -54,7 +59,12 @@ export function App() {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <Header />
+      <Header
+        networkMode={networkMode}
+        onNetworkModeChange={setNetworkMode}
+        onOpenPiiInspector={() => setIsPiiInspectorOpen(true)}
+        onOpenCopilot={() => setIsCopilotOpen(true)}
+      />
 
       {/* Cloud Pub/Sub Notification Toast */}
       {liveSyncNotice && (
@@ -191,6 +201,17 @@ export function App() {
 
       {/* Footer */}
       <Footer />
+
+      {/* Mission-Critical Modals */}
+      <PiiInspectorModal
+        isOpen={isPiiInspectorOpen}
+        onClose={() => setIsPiiInspectorOpen(false)}
+      />
+
+      <AiFieldCopilotModal
+        isOpen={isCopilotOpen}
+        onClose={() => setIsCopilotOpen(false)}
+      />
     </div>
   );
 }

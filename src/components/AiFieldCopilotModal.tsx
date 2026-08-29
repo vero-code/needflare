@@ -1,0 +1,258 @@
+﻿import React, { useState } from 'react';
+import { Sparkles, Send, Bot, User, X, AlertCircle } from 'lucide-react';
+
+interface AiFieldCopilotModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+interface Message {
+  role: 'user' | 'assistant';
+  text: string;
+  time: string;
+}
+
+const QUICK_QUERIES = [
+  'What is the standard water triage quota for 6 trapped citizens?',
+  'Recommend priority routes for flooded Sector Alpha (Miami Marina)',
+  'How should insulin be transported without power grid?',
+  'Status of universal Veo broadcast for water decontamination',
+];
+
+export const AiFieldCopilotModal: React.FC<AiFieldCopilotModalProps> = ({ isOpen, onClose }) => {
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      role: 'assistant',
+      text: 'Hello, Field Responder. I am your Gemini 3.7 Flash Disaster Copilot. You can ask me about triage protocols, route recommendations, payload estimations, or Veo survival broadcasts.',
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    },
+  ]);
+  const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  if (!isOpen) return null;
+
+  const handleSend = async (queryText?: string) => {
+    const textToSend = queryText || input;
+    if (!textToSend.trim() || isLoading) return;
+
+    const userMsg: Message = {
+      role: 'user',
+      text: textToSend,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    };
+
+    setMessages((prev) => [...prev, userMsg]);
+    setInput('');
+    setIsLoading(true);
+
+    // Simulate or query copilot response
+    setTimeout(() => {
+      let reply = 'Triage assessment confirmed. In flooded environments, prioritize potable water (3L/person/day) and portable filtration tablets immediately. Mobilize amphibious or high-clearance 4x4 squads.';
+      
+      const lower = textToSend.toLowerCase();
+      if (lower.includes('water') || lower.includes('quota')) {
+        reply = 'For 6 people (including toddlers) in a flooded basement: Allocate a minimum of 18L clean drinking water for 24h, 2 packs of rapid purification tablets, and 1 pediatrics oral rehydration kit.';
+      } else if (lower.includes('insulin')) {
+        reply = 'Insulin stability: Maintain between 2°C–8°C using portable battery-powered coolboxes or insulated gel packs. Prioritize deploying 1kW portable generator to Sector Bravo community clinic.';
+      } else if (lower.includes('route') || lower.includes('alpha')) {
+        reply = 'Sector Alpha advisory: Downtown Miami waterfront has 0.8m storm surge. Avoid Biscayne Blvd underpasses. Use high-elevation MacArthur Causeway access via amphibious rescue boat.';
+      } else if (lower.includes('veo')) {
+        reply = 'Google Veo Universal Visual Guide [veo-water-01] is currently transmitting in continuous broadcast mode over local mesh, providing non-verbal boiling & filtering instructions.';
+      }
+
+      const botMsg: Message = {
+        role: 'assistant',
+        text: reply,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      };
+      setMessages((prev) => [...prev, botMsg]);
+      setIsLoading(false);
+    }, 700);
+  };
+
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 2000,
+        background: 'rgba(0, 0, 0, 0.8)',
+        backdropFilter: 'blur(4px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '1rem',
+      }}
+    >
+      <div
+        style={{
+          background: '#0f172a',
+          border: '1px solid #334155',
+          borderRadius: '14px',
+          width: '100%',
+          maxWidth: '650px',
+          height: '620px',
+          display: 'flex',
+          flexDirection: 'column',
+          boxShadow: '0 20px 50px rgba(0, 0, 0, 0.6)',
+          overflow: 'hidden',
+        }}
+      >
+        {/* Header */}
+        <div
+          style={{
+            background: '#1e293b',
+            padding: '1rem 1.25rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            borderBottom: '1px solid #334155',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{ background: '#8b5cf620', padding: '8px', borderRadius: '8px' }}>
+              <Sparkles size={20} color="#a78bfa" />
+            </div>
+            <div>
+              <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: '#f8fafc' }}>
+                Gemini 3.7 Disaster Copilot
+              </h3>
+              <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+                Field Commander & Volunteer Decision Support
+              </span>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              color: '#94a3b8',
+              cursor: 'pointer',
+              padding: '6px',
+            }}
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        {/* Quick Query Chips */}
+        <div style={{ padding: '8px 12px', background: '#0b1329', borderBottom: '1px solid #1e293b', display: 'flex', gap: '6px', overflowX: 'auto' }}>
+          {QUICK_QUERIES.map((q, idx) => (
+            <button
+              key={idx}
+              onClick={() => handleSend(q)}
+              style={{
+                background: '#1e293b',
+                border: '1px solid #334155',
+                color: '#cbd5e1',
+                padding: '4px 10px',
+                borderRadius: '6px',
+                fontSize: '0.7rem',
+                whiteSpace: 'nowrap',
+                cursor: 'pointer',
+              }}
+            >
+              {q}
+            </button>
+          ))}
+        </div>
+
+        {/* Messages Body */}
+        <div style={{ flex: 1, padding: '1rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          {messages.map((m, i) => (
+            <div
+              key={i}
+              style={{
+                display: 'flex',
+                gap: '8px',
+                alignItems: 'flex-start',
+                alignSelf: m.role === 'user' ? 'flex-end' : 'flex-start',
+                maxWidth: '85%',
+              }}
+            >
+              {m.role === 'assistant' && (
+                <div style={{ background: '#8b5cf620', padding: '6px', borderRadius: '6px', flexShrink: 0 }}>
+                  <Bot size={16} color="#a78bfa" />
+                </div>
+              )}
+              <div
+                style={{
+                  background: m.role === 'user' ? '#3b82f6' : '#1e293b',
+                  color: '#f8fafc',
+                  padding: '10px 14px',
+                  borderRadius: '10px',
+                  fontSize: '0.85rem',
+                  lineHeight: '1.4',
+                  border: m.role === 'user' ? 'none' : '1px solid #334155',
+                }}
+              >
+                {m.text}
+                <div style={{ fontSize: '0.65rem', color: m.role === 'user' ? '#dbeafe' : '#64748b', marginTop: '4px', textAlign: 'right' }}>
+                  {m.time}
+                </div>
+              </div>
+              {m.role === 'user' && (
+                <div style={{ background: '#3b82f620', padding: '6px', borderRadius: '6px', flexShrink: 0 }}>
+                  <User size={16} color="#60a5fa" />
+                </div>
+              )}
+            </div>
+          ))}
+          {isLoading && (
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', color: '#94a3b8', fontSize: '0.8rem' }}>
+              <Sparkles size={16} color="#a78bfa" className="animate-spin" />
+              <span>Gemini 3.7 synthesizing tactical guidance...</span>
+            </div>
+          )}
+        </div>
+
+        {/* Input Footer */}
+        <div
+          style={{
+            padding: '12px',
+            background: '#1e293b',
+            borderTop: '1px solid #334155',
+            display: 'flex',
+            gap: '8px',
+          }}
+        >
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+            placeholder="Ask Gemini 3.7 about triage, routes, or logistics..."
+            style={{
+              flex: 1,
+              background: '#0f172a',
+              border: '1px solid #334155',
+              borderRadius: '8px',
+              padding: '10px 12px',
+              color: '#f8fafc',
+              fontSize: '0.85rem',
+              outline: 'none',
+            }}
+          />
+          <button
+            onClick={() => handleSend()}
+            style={{
+              background: '#3b82f6',
+              border: 'none',
+              borderRadius: '8px',
+              padding: '0 16px',
+              color: '#fff',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Send size={18} />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
