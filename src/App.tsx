@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CloudLightning, LayoutDashboard, Smartphone, Video } from 'lucide-react';
 import { Header, type NetworkMode } from './components/Header';
 import { Footer } from './components/Footer';
@@ -9,11 +9,14 @@ import { CoordinatorDashboard } from './components/CoordinatorDashboard';
 import { VeoBroadcastGallery } from './components/VeoBroadcastGallery';
 import { CloudGeminiAgent } from './services/cloudGeminiAgent';
 import { VeoService } from './services/veoService';
+import { EdgeGemmaService } from './services/edgeGemmaService';
 import type { SectorZone, LogisticsTask, VeoVisualGuide, AnonymizedReport } from './types';
 
 export function App() {
   const [activeTab, setActiveTab] = useState<'field' | 'coordinator' | 'veo'>('coordinator');
   const [networkMode, setNetworkMode] = useState<NetworkMode>('ONLINE_4G');
+  const [pendingQueueCount, setPendingQueueCount] = useState<number>(0);
+  const [isSyncing, setIsSyncing] = useState<boolean>(false);
   const [isPiiInspectorOpen, setIsPiiInspectorOpen] = useState<boolean>(false);
   const [isCopilotOpen, setIsCopilotOpen] = useState<boolean>(false);
   const [sectors, setSectors] = useState<SectorZone[]>(CloudGeminiAgent.initialSectors);
@@ -21,9 +24,26 @@ export function App() {
   const [guides, setGuides] = useState<VeoVisualGuide[]>(VeoService.initialGuides);
   const [liveSyncNotice, setLiveSyncNotice] = useState<string | null>(null);
 
+  const refreshPendingCount = () => {
+    const queue = EdgeGemmaService.getOfflineQueue();
+    const count = queue.filter((r) => r.syncStatus === 'offline_queued').length;
+    setPendingQueueCount(count);
+  };
+
+  useEffect(() => {
+    refreshPendingCount();
+  }, []);
+
   // Handle synchronization of reports from volunteers to Cloud Agent
   const handleSyncBatchToCloud = async (reports: AnonymizedReport[]) => {
-    setLiveSyncNotice(`Google Cloud Pub/Sub: Ingesting ${reports.length} report(s)...`);
+    const modeLabel =
+      networkMode === 'WEAK_LORA'
+        ? 'LoRa Mesh Packet Radio'
+        : networkMode === 'BURST_SATELLITE'
+        ? 'Orbital Satellite Uplink'
+        : 'Google Cloud Pub/Sub Pipeline';
+
+    setLiveSyncNotice(`${modeLabel}: Ingesting ${reports.length} report(s)...`);
 
     for (const report of reports) {
       const triageResult = await CloudGeminiAgent.processCloudTriage(report, sectors, tasks);
@@ -38,9 +58,23 @@ export function App() {
       }
     }
 
+    refreshPendingCount();
     setTimeout(() => {
       setLiveSyncNotice(null);
     }, 4500);
+  };
+
+  const handleTriggerSync = async () => {
+    if (networkMode === 'OFFLINE' || isSyncing) return;
+    const queue = EdgeGemmaService.getOfflineQueue();
+    const pending = queue.filter((r) => r.syncStatus === 'offline_queued');
+    if (pending.length === 0) return;
+
+    setIsSyncing(true);
+    pending.forEach((r) => EdgeGemmaService.updateReportStatus(r.id, 'synced'));
+    await handleSyncBatchToCloud(pending);
+    refreshPendingCount();
+    setIsSyncing(false);
   };
 
   const handleUpdateTaskStatus = (taskId: string, status: LogisticsTask['status']) => {
@@ -62,6 +96,9 @@ export function App() {
       <Header
         networkMode={networkMode}
         onNetworkModeChange={setNetworkMode}
+        pendingQueueCount={pendingQueueCount}
+        isSyncing={isSyncing}
+        onTriggerSync={handleTriggerSync}
         onOpenPiiInspector={() => setIsPiiInspectorOpen(true)}
         onOpenCopilot={() => setIsCopilotOpen(true)}
       />
@@ -186,7 +223,10 @@ export function App() {
 
         {activeTab === 'field' && (
           <div style={{ maxWidth: '700px', margin: '0 auto' }}>
-            <VolunteerEdgeView onSyncBatchToCloud={handleSyncBatchToCloud} />
+            <VolunteerEdgeView
+              onSyncBatchToCloud={handleSyncBatchToCloud}
+              onQueueChange={refreshPendingCount}
+            />
           </div>
         )}
 

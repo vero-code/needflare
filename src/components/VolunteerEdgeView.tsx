@@ -5,9 +5,10 @@ import type { RawFieldReport, AnonymizedReport } from '../types';
 
 interface VolunteerEdgeViewProps {
   onSyncBatchToCloud: (reports: AnonymizedReport[]) => void;
+  onQueueChange?: () => void;
 }
 
-export const VolunteerEdgeView: React.FC<VolunteerEdgeViewProps> = ({ onSyncBatchToCloud }) => {
+export const VolunteerEdgeView: React.FC<VolunteerEdgeViewProps> = ({ onSyncBatchToCloud, onQueueChange }) => {
   const [isOnline, setIsOnline] = useState<boolean>(false);
   const [volunteerId] = useState<string>('VOLUNTEER-77-ALPHA');
   const [sectorId, setSectorId] = useState<string>('sector-alpha');
@@ -39,6 +40,7 @@ export const VolunteerEdgeView: React.FC<VolunteerEdgeViewProps> = ({ onSyncBatc
     setLastProcessedReport(anonymized);
     setOfflineQueue(EdgeGemmaService.getOfflineQueue());
     setIsProcessingGemma(false);
+    onQueueChange?.();
   };
 
   const handleSyncToCloud = () => {
@@ -52,6 +54,7 @@ export const VolunteerEdgeView: React.FC<VolunteerEdgeViewProps> = ({ onSyncBatc
 
     setOfflineQueue(EdgeGemmaService.getOfflineQueue());
     onSyncBatchToCloud(queuedReports);
+    onQueueChange?.();
   };
 
   return (
