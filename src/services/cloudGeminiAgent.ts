@@ -134,8 +134,9 @@ export class CloudGeminiAgent {
     let triggeredVeoPrompt: string | undefined;
 
     // 1. Attempt to call the real Genkit Gemini 3.7 Flash agent through the backend
+    const AGENT_URL = (import.meta as any).env?.VITE_AGENT_URL || 'http://localhost:8080';
     try {
-      const response = await fetch('http://localhost:8080/needflareTriageFlow', {
+      const response = await fetch(`${AGENT_URL}/needflareTriageFlow`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

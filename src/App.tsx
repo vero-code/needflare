@@ -56,12 +56,26 @@ export function App() {
       setSectors(triageResult.updatedSectors);
 
       if (triageResult.generatedTask) {
-        setTasks((prev) => [triageResult.generatedTask!, ...prev]);
+        const enhancedTask = { ...triageResult.generatedTask, aiGenerated: true };
+        setTasks((prev) => [enhancedTask, ...prev]);
       }
 
       if (triageResult.triggeredVeoPrompt) {
         setLiveSyncNotice(`Gemini Flash triggered automatic Veo Visual Guide for [${report.category.toUpperCase()}]`);
       }
+    }
+
+    // Forward batch to Cloud Run server for Firestore and Pub/Sub persistence
+    const AGENT_URL = (import.meta as any).env?.VITE_AGENT_URL || 'http://localhost:8080';
+    try {
+      await fetch(`${AGENT_URL}/api/reports/batch-sync`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reports }),
+      });
+      console.log('✅ Batch successfully synced to Cloud Run / Firestore / PubSub');
+    } catch (e) {
+      console.warn('⚠️ Cloud Run batch sync endpoint offline or unreachable:', e);
     }
 
     refreshPendingCount();
@@ -152,6 +166,7 @@ export function App() {
           <CoordinatorDashboard
             sectors={sectors}
             tasks={tasks}
+            reports={offlineReports}
             onUpdateTaskStatus={handleUpdateTaskStatus}
           />
         )}

@@ -122,6 +122,42 @@ curl -X POST http://localhost:8080/api/reports/batch-sync \
 
 ---
 
+## ☁️ Phase 1.2: Serverless Agent Deployment on Google Cloud Run (Completed & Verified)
+
+The GenKit agent server is containerized and deployed on **Google Cloud Run**, serving as the autonomous serverless backend for disaster triage:
+
+### Deployment Architecture & Settings
+- **Service Name:** `needflare-agent`
+- **Region:** `us-central1`
+- **Scaling Policy:** Serverless scale-to-zero (`--min-instances 0`, `--max-instances 3`) — zero compute charges during idle periods, scaling on incoming batches.
+- **Security & Governance:** `GEMINI_API_KEY` is securely mounted via **Google Secret Manager** (`roles/secretmanager.secretAccessor`) without hardcoding credentials in the image or container environment.
+
+### Live Cloud Verification
+```bash
+# 1. Live Agent Health Check
+curl https://<your-cloud-run-url>/health
+
+# 2. Live Multi-Service Diagnostics (Pub/Sub + Firestore + Gemini 3.7 Flash)
+curl https://<your-cloud-run-url>/api/agent/status
+```
+
+**Verified Response:**
+```json
+{
+  "status": "ok",
+  "agent": "NeedFlare Gemini 3.7 Flash Agent",
+  "model": "gemini-3.7-flash",
+  "framework": "GenKit v1.41",
+  "infrastructure": {
+    "firestore": { "connected": true, "project": "<your-project-id>" },
+    "pubsub": { "connected": true, "topic": "needflare-reports", "project": "<your-project-id>" }
+  },
+  "geminiApiKey": "✅ set"
+}
+```
+
+---
+
 ## 🚀 Local Development
 
 ### Prerequisites
