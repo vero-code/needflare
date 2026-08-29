@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Flame,
   Radio,
@@ -48,6 +48,18 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const [internalTheme, setInternalTheme] = useState<DisplayTheme>(displayTheme);
   const currentTheme = displayTheme || internalTheme;
+  const [batteryLevel, setBatteryLevel] = useState<number | null>(null);
+
+  useEffect(() => {
+    // Real device battery via Web Battery API
+    const nav = navigator as any;
+    if (nav.getBattery) {
+      nav.getBattery().then((battery: any) => {
+        setBatteryLevel(Math.round(battery.level * 100));
+        battery.onlevelchange = () => setBatteryLevel(Math.round(battery.level * 100));
+      }).catch(() => setBatteryLevel(null));
+    }
+  }, []);
 
   const handleThemeSwitch = (theme: DisplayTheme) => {
     setInternalTheme(theme);
@@ -509,7 +521,9 @@ export const Header: React.FC<HeaderProps> = ({
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#10b981' }}>
             <BatteryCharging size={14} color="#10b981" />
-            <span style={{ fontWeight: 700, fontSize: '0.74rem' }}>BATTERY: 78%</span>
+            <span style={{ fontWeight: 700, fontSize: '0.74rem' }}>
+              BATTERY: {batteryLevel !== null ? `${batteryLevel}%` : '--'}
+            </span>
           </div>
           <span style={{ color: '#334155' }}>|</span>
           <div style={{ color: '#94a3b8', fontSize: '0.74rem' }}>
