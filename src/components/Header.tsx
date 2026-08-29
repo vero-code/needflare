@@ -1,14 +1,7 @@
-﻿import React from 'react';
-import { Flame, Smartphone, LayoutDashboard, Video } from 'lucide-react';
+import React from 'react';
+import { Flame, Shield } from 'lucide-react';
 
-type ActiveTab = 'field' | 'coordinator' | 'veo';
-
-interface HeaderProps {
-  activeTab: ActiveTab;
-  onTabChange: (tab: ActiveTab) => void;
-}
-
-export const Header: React.FC<HeaderProps> = ({ activeTab, onTabChange }) => {
+export const Header: React.FC = () => {
   return (
     <header
       style={{
@@ -55,75 +48,22 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onTabChange }) => {
         </div>
       </div>
 
-      {/* Navigation Tabs */}
+      {/* Status Badge */}
       <div
         style={{
           display: 'flex',
-          background: '#1e293b',
-          padding: '4px',
-          borderRadius: '10px',
-          gap: '4px',
+          alignItems: 'center',
+          gap: '8px',
+          background: '#1e293b80',
+          border: '1px solid #334155',
+          padding: '6px 12px',
+          borderRadius: '8px',
+          fontSize: '0.75rem',
+          color: '#94a3b8',
         }}
       >
-        <button
-          onClick={() => onTabChange('coordinator')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            padding: '8px 14px',
-            borderRadius: '8px',
-            border: 'none',
-            fontSize: '0.85rem',
-            fontWeight: 600,
-            cursor: 'pointer',
-            background: activeTab === 'coordinator' ? '#3b82f6' : 'transparent',
-            color: activeTab === 'coordinator' ? '#fff' : '#94a3b8',
-          }}
-        >
-          <LayoutDashboard size={16} />
-          Coordinator Map & Triage
-        </button>
-
-        <button
-          onClick={() => onTabChange('field')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            padding: '8px 14px',
-            borderRadius: '8px',
-            border: 'none',
-            fontSize: '0.85rem',
-            fontWeight: 600,
-            cursor: 'pointer',
-            background: activeTab === 'field' ? '#3b82f6' : 'transparent',
-            color: activeTab === 'field' ? '#fff' : '#94a3b8',
-          }}
-        >
-          <Smartphone size={16} />
-          Volunteer Field Edge (Gemma)
-        </button>
-
-        <button
-          onClick={() => onTabChange('veo')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            padding: '8px 14px',
-            borderRadius: '8px',
-            border: 'none',
-            fontSize: '0.85rem',
-            fontWeight: 600,
-            cursor: 'pointer',
-            background: activeTab === 'veo' ? '#8b5cf6' : 'transparent',
-            color: activeTab === 'veo' ? '#fff' : '#94a3b8',
-          }}
-        >
-          <Video size={16} />
-          Veo Visual Guides
-        </button>
+        <Shield size={14} color="#10b981" />
+        <span>Crisis Response Network Active</span>
       </div>
     </header>
   );

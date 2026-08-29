@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CloudLightning } from 'lucide-react';
+import { CloudLightning, LayoutDashboard, Smartphone, Video } from 'lucide-react';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { VolunteerEdgeView } from './components/VolunteerEdgeView';
@@ -54,7 +54,7 @@ export function App() {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <Header activeTab={activeTab} onTabChange={setActiveTab} />
+      <Header />
 
       {/* Cloud Pub/Sub Notification Toast */}
       {liveSyncNotice && (
@@ -77,7 +77,95 @@ export function App() {
       )}
 
       {/* Main Container */}
-      <main style={{ flex: 1, padding: '2rem', maxWidth: '1400px', width: '100%', margin: '0 auto' }}>
+      <main style={{ flex: 1, padding: '1.5rem 2rem 2rem 2rem', maxWidth: '1400px', width: '100%', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        
+        {/* Primary Navigation Tabs */}
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: '1rem',
+            background: '#1e293b',
+            padding: '8px 12px',
+            borderRadius: '12px',
+            border: '1px solid #334155',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+          }}
+        >
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            <button
+              onClick={() => setActiveTab('coordinator')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '10px 18px',
+                borderRadius: '8px',
+                border: 'none',
+                fontSize: '0.9rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                background: activeTab === 'coordinator' ? '#3b82f6' : '#0f172a',
+                color: activeTab === 'coordinator' ? '#fff' : '#94a3b8',
+                boxShadow: activeTab === 'coordinator' ? '0 2px 8px rgba(59,130,246,0.35)' : 'none',
+                transition: 'all 0.2s ease',
+              }}
+            >
+              <LayoutDashboard size={18} />
+              Coordinator Map &amp; Triage
+            </button>
+
+            <button
+              onClick={() => setActiveTab('field')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '10px 18px',
+                borderRadius: '8px',
+                border: 'none',
+                fontSize: '0.9rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                background: activeTab === 'field' ? '#3b82f6' : '#0f172a',
+                color: activeTab === 'field' ? '#fff' : '#94a3b8',
+                boxShadow: activeTab === 'field' ? '0 2px 8px rgba(59,130,246,0.35)' : 'none',
+                transition: 'all 0.2s ease',
+              }}
+            >
+              <Smartphone size={18} />
+              Volunteer Field Edge (Gemma)
+            </button>
+
+            <button
+              onClick={() => setActiveTab('veo')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '10px 18px',
+                borderRadius: '8px',
+                border: 'none',
+                fontSize: '0.9rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                background: activeTab === 'veo' ? '#8b5cf6' : '#0f172a',
+                color: activeTab === 'veo' ? '#fff' : '#94a3b8',
+                boxShadow: activeTab === 'veo' ? '0 2px 8px rgba(139,92,246,0.35)' : 'none',
+                transition: 'all 0.2s ease',
+              }}
+            >
+              <Video size={18} />
+              Veo Visual Guides
+            </button>
+          </div>
+
+          <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600 }}>
+            Mode: <span style={{ color: '#38bdf8' }}>{activeTab === 'coordinator' ? 'HQ Coordination' : activeTab === 'field' ? 'Field Terminal (Offline Ready)' : 'Universal Broadcast'}</span>
+          </div>
+        </div>
         {activeTab === 'coordinator' && (
           <CoordinatorDashboard
             sectors={sectors}
