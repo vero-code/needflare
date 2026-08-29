@@ -1,19 +1,21 @@
-﻿import React from 'react';
+import React from 'react';
 import { MetricsBanner } from './MetricsBanner';
 import { DisasterHeatmap } from './DisasterHeatmap';
 import { LogisticsTaskStream } from './LogisticsTaskStream';
 import { IncidentEventStream } from './IncidentEventStream';
-import type { SectorZone, LogisticsTask } from '../types';
+import type { SectorZone, LogisticsTask, AnonymizedReport } from '../types';
 
 interface CoordinatorDashboardProps {
   sectors: SectorZone[];
   tasks: LogisticsTask[];
+  reports: AnonymizedReport[];
   onUpdateTaskStatus: (taskId: string, status: LogisticsTask['status']) => void;
 }
 
 export const CoordinatorDashboard: React.FC<CoordinatorDashboardProps> = ({
   sectors,
   tasks,
+  reports,
   onUpdateTaskStatus,
 }) => {
   return (
@@ -30,8 +32,8 @@ export const CoordinatorDashboard: React.FC<CoordinatorDashboardProps> = ({
         <LogisticsTaskStream tasks={tasks} onUpdateTaskStatus={onUpdateTaskStatus} />
       </div>
 
-      {/* 3. Live Incident & Event Log */}
-      <IncidentEventStream />
+      {/* 3. Live Incident & Event Log — real data from submitted reports */}
+      <IncidentEventStream reports={reports} tasks={tasks} />
     </div>
   );
 };
