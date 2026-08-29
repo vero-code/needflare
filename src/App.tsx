@@ -15,7 +15,7 @@ import { EdgeGemmaService } from './services/edgeGemmaService';
 import type { SectorZone, LogisticsTask, VeoVisualGuide, AnonymizedReport } from './types';
 
 export function App() {
-  const [activeTab, setActiveTab] = useState<MainTab>('coordinator');
+  const [activeTab, setActiveTab] = useState<MainTab>('field');
   const [networkMode, setNetworkMode] = useState<NetworkMode>('ONLINE_4G');
   const [displayTheme, setDisplayTheme] = useState<DisplayTheme>('AMOLED_TACTICAL');
   const [pendingQueueCount, setPendingQueueCount] = useState<number>(0);
