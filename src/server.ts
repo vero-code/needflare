@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { needflareTriageFlow } from './agent/needflareAgent.js';
-import { saveReport, saveTask, getFirestoreStatus } from './server/firestore.js';
+import { saveReport, saveTask, getFirestoreStatus, getReports, getTasks } from './server/firestore.js';
 import { publishReport, getPubSubStatus } from './server/pubsub.js';
 import type { AnonymizedReport } from './types/index.js';
 
@@ -57,22 +57,20 @@ app.post('/api/reports/batch-sync', async (req, res) => {
         });
         agentReasoning = triageResult.agentReasoning || '';
 
-        // 4. Persist generated task to Firestore if any
-        if (report.preliminaryUrgency === 'critical' || report.preliminaryUrgency === 'high') {
-          const generatedTask = {
-            id: `task-genkit-${Date.now().toString().slice(-5)}`,
-            sectorId: report.sectorId,
-            title: `Agent Task: ${report.category.toUpperCase()} — ${report.sectorId}`,
-            description: agentReasoning || `Gemini 3.7 triage for ${report.sanitizedSummary.slice(0, 80)}`,
-            priority: report.preliminaryUrgency,
-            category: report.category,
-            requiredPayload: '',
-            status: 'pending' as const,
-            createdAt: Date.now(),
-            aiGenerated: true,
-          };
-          await saveTask(generatedTask);
-        }
+        // 4. Persist generated task to Firestore
+        const generatedTask = {
+          id: `task-genkit-${Date.now().toString().slice(-5)}`,
+          sectorId: report.sectorId,
+          title: `Agent Task: ${report.category.toUpperCase()} — ${report.sectorId}`,
+          description: agentReasoning || `Gemini 3.7 triage for ${report.sanitizedSummary.slice(0, 80)}`,
+          priority: report.preliminaryUrgency,
+          category: report.category,
+          requiredPayload: '',
+          status: 'pending' as const,
+          createdAt: Date.now(),
+          aiGenerated: true,
+        };
+        await saveTask(generatedTask);
 
         results.push({ id: report.id, taskGenerated: !!agentReasoning, agentReasoning });
       } catch (err) {
@@ -110,6 +108,26 @@ app.get('/api/agent/status', async (_, res) => {
     googleCloudProject: process.env.GOOGLE_CLOUD_PROJECT || null,
     timestamp: new Date().toISOString(),
   });
+});
+
+// ─── GET: List reports from Firestore ────────────────────────────────────────
+app.get('/api/reports', async (_, res) => {
+  try {
+    const reports = await getReports();
+    res.json({ reports, total: reports.length });
+  } catch (error: any) {
+    res.status(500).json({ error: error?.message || 'Failed to fetch reports' });
+  }
+});
+
+// ─── GET: List tasks from Firestore ──────────────────────────────────────────
+app.get('/api/tasks', async (_, res) => {
+  try {
+    const tasks = await getTasks();
+    res.json({ tasks, total: tasks.length });
+  } catch (error: any) {
+    res.status(500).json({ error: error?.message || 'Failed to fetch tasks' });
+  }
 });
 
 // ─── Health check (unchanged) ────────────────────────────────────────────────

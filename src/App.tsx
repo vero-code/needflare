@@ -40,6 +40,23 @@ export function App() {
     refreshPendingCount();
   }, []);
 
+  // Load tasks from Firestore via Cloud Run on startup
+  useEffect(() => {
+    const AGENT_URL = (import.meta as any).env?.VITE_AGENT_URL || 'http://localhost:8080';
+    fetch(`${AGENT_URL}/api/tasks`)
+      .then(r => r.json())
+      .then(data => {
+        if (Array.isArray(data.tasks) && data.tasks.length > 0) {
+          // Merge: Firestore AI tasks first, then mock tasks (no duplicates)
+          const mockIds = new Set(CloudGeminiAgent.initialTasks.map((t: LogisticsTask) => t.id));
+          const firestoreTasks = data.tasks.filter((t: LogisticsTask) => !mockIds.has(t.id));
+          setTasks([...firestoreTasks, ...CloudGeminiAgent.initialTasks]);
+          console.log(`✅ Loaded ${firestoreTasks.length} task(s) from Firestore`);
+        }
+      })
+      .catch(() => console.warn('⚠️ Could not load tasks from Cloud Run — using defaults'));
+  }, []);
+
   // Handle synchronization of reports from volunteers to Cloud Agent
   const handleSyncBatchToCloud = async (reports: AnonymizedReport[]) => {
     const modeLabel =
@@ -127,10 +144,11 @@ export function App() {
         onOpenCopilot={() => setIsCopilotOpen(true)}
         displayTheme={displayTheme}
         onThemeChange={setDisplayTheme}
-        activeIncidentsCount={offlineReports.length || 3}
-        criticalT1Count={offlineReports.filter((r) => r.preliminaryUrgency === 'critical').length || 3}
-        logisticsConvoysCount={tasks.length || 4}
+        activeIncidentsCount={sectors.filter(s => s.emergencyLevel !== 'low' && s.totalReportsCount > 0).length}
+        criticalT1Count={sectors.filter(s => s.emergencyLevel === 'critical').reduce((sum, s) => sum + s.totalReportsCount, 0)}
+        logisticsConvoysCount={tasks.length}
       />
+
 
       {/* Cloud Pub/Sub Notification Toast */}
       {liveSyncNotice && (

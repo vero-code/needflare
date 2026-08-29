@@ -176,7 +176,7 @@ export class CloudGeminiAgent {
 
     // 3. Auto-generation of logistics task
     let generatedTask: LogisticsTask | undefined;
-    if (newReport.preliminaryUrgency === 'critical' || newReport.preliminaryUrgency === 'high') {
+    if (true) { // generate task for every report regardless of urgency
       generatedTask = {
         id: `task-${Date.now().toString().slice(-4)}`,
         sectorId: newReport.sectorId,

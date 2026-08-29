@@ -1,4 +1,5 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
+import ReactMarkdown from 'react-markdown';
 import {
   Layers,
   CheckCircle,
@@ -51,7 +52,18 @@ export const LogisticsTaskStream: React.FC<LogisticsTaskStreamProps> = ({
     }
   };
 
-  const filteredTasks = tasks.filter((t) => (taskFilter === 'all' ? true : t.status === taskFilter));
+  const filteredTasks = tasks
+    .filter((t) => (taskFilter === 'all' ? true : t.status === taskFilter))
+    .sort((a, b) => {
+      // AI-generated tasks float to top, then sort by createdAt descending
+      const aAI = (a as any).aiGenerated ? 1 : 0;
+      const bAI = (b as any).aiGenerated ? 1 : 0;
+      if (bAI !== aAI) return bAI - aAI;
+      return b.createdAt - a.createdAt;
+    });
+  const nowMs = Date.now();
+  const isLive = (task: LogisticsTask) =>
+    !!(task as any).aiGenerated && (nowMs - task.createdAt) < 30 * 60 * 1000;
 
   return (
     <div
@@ -126,13 +138,23 @@ export const LogisticsTaskStream: React.FC<LogisticsTaskStreamProps> = ({
               {/* Header: Title + Sector & Priority Badges */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '6px' }}>
                 <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '3px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '3px', flexWrap: 'wrap' }}>
                     <span style={{ fontSize: '0.65rem', fontFamily: 'monospace', fontWeight: 800, background: '#1e293b', color: '#38bdf8', padding: '1px 6px', borderRadius: '3px' }}>
                       {task.id.toUpperCase()}
                     </span>
                     <span style={{ fontSize: '0.65rem', fontFamily: 'monospace', fontWeight: 800, background: '#f59e0b20', color: '#fbbf24', padding: '1px 6px', borderRadius: '3px' }}>
                       SECTOR: {task.sectorId.toUpperCase()}
                     </span>
+                    {((task as any).aiGenerated || (!['task-101', 'task-102', 'task-103', 'task-104'].includes(task.id))) && (
+                      <span style={{ fontSize: '0.65rem', fontFamily: 'monospace', fontWeight: 800, background: '#6366f125', color: '#a78bfa', padding: '1px 6px', borderRadius: '3px', border: '1px solid #6366f150' }}>
+                        🤖 GEMINI AGENT DISPATCH
+                      </span>
+                    )}
+                    {isLive(task) && (
+                      <span style={{ fontSize: '0.65rem', fontFamily: 'monospace', fontWeight: 800, background: '#10b98125', color: '#34d399', padding: '1px 8px', borderRadius: '3px', border: '1px solid #10b98150' }}>
+                        ✨ NEW
+                      </span>
+                    )}
                   </div>
                   <span style={{ fontWeight: 800, fontSize: '0.95rem', color: '#f8fafc' }}>{task.title}</span>
                 </div>
@@ -160,9 +182,14 @@ export const LogisticsTaskStream: React.FC<LogisticsTaskStreamProps> = ({
               </div>
 
               {/* Rationale / Description */}
-              <p style={{ margin: 0, fontSize: '0.8rem', color: '#cbd5e1', lineHeight: '1.4' }}>
-                <strong style={{ color: '#94a3b8' }}>Rationale:</strong> {task.description}
-              </p>
+              <div style={{ background: '#090d16', padding: '8px 10px', borderRadius: '6px', border: '1px solid #1e293b' }}>
+                <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#94a3b8', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <span>AI DECISION RATIONALE:</span>
+                </div>
+                <div style={{ fontSize: '0.8rem', color: '#cbd5e1', lineHeight: '1.55' }} className="markdown-rationale">
+                  <ReactMarkdown>{task.description}</ReactMarkdown>
+                </div>
+              </div>
 
               {/* Cargo / Allocated Payload Breakdown */}
               <div style={{ background: '#1e293b70', padding: '8px 10px', borderRadius: '6px', border: '1px solid #334155' }}>

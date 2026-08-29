@@ -52,3 +52,27 @@ export async function getFirestoreStatus(): Promise<{ connected: boolean; projec
     return { connected: false, project: process.env.GOOGLE_CLOUD_PROJECT };
   }
 }
+
+export async function getReports(): Promise<AnonymizedReport[]> {
+  const firestore = getDb();
+  if (!firestore) return [];
+  try {
+    const snap = await firestore.collection('reports').orderBy('serverReceivedAt', 'desc').limit(100).get();
+    return snap.docs.map(d => d.data() as AnonymizedReport);
+  } catch (err) {
+    console.error('❌ [Firestore] getReports failed:', err);
+    return [];
+  }
+}
+
+export async function getTasks(): Promise<any[]> {
+  const firestore = getDb();
+  if (!firestore) return [];
+  try {
+    const snap = await firestore.collection('tasks').orderBy('createdAt', 'desc').limit(50).get();
+    return snap.docs.map(d => d.data());
+  } catch (err) {
+    console.error('❌ [Firestore] getTasks failed:', err);
+    return [];
+  }
+}
