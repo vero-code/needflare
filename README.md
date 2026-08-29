@@ -139,20 +139,24 @@ curl https://<your-cloud-run-url>/health
 
 # 2. Live Multi-Service Diagnostics (Pub/Sub + Firestore + Gemini 3.7 Flash)
 curl https://<your-cloud-run-url>/api/agent/status
+
+# 3. Live Batch Ingestion & Autonomous Dispatch in Cloud Run
+curl -X POST https://<your-cloud-run-url>/api/reports/batch-sync \
+  -H "Content-Type: application/json" \
+  -d '{"reports":[{"id":"cloud-test-003","sectorId":"sector-alpha","sanitizedSummary":"Flash flood rescue needed, 3 elderly people trapped on roof","category":"rescue","preliminaryUrgency":"critical","estimatedPeopleCount":3,"timestamp":1234567890,"syncStatus":"offline_queued"}]}'
 ```
 
-**Verified Response:**
+**Verified Response (Gemini 3.7 Flash Autonomous Dispatch):**
 ```json
 {
-  "status": "ok",
-  "agent": "NeedFlare Gemini 3.7 Flash Agent",
-  "model": "gemini-3.7-flash",
-  "framework": "GenKit v1.41",
-  "infrastructure": {
-    "firestore": { "connected": true, "project": "<your-project-id>" },
-    "pubsub": { "connected": true, "topic": "needflare-reports", "project": "<your-project-id>" }
-  },
-  "geminiApiKey": "✅ set"
+  "synced": 1,
+  "results": [
+    {
+      "id": "cloud-test-003",
+      "taskGenerated": true,
+      "agentReasoning": "### Emergency Assessment & Dispatch Summary\n\n**Sector:** `sector-alpha`\n**Report:** Flash flood rescue needed – 3 elderly individuals trapped on roof\n**Assessed Severity:** **CRITICAL**\n**Dominant Need:** **Rescue**\n\n### Actions Taken:\n1. **Sector Triage Updated:** Elevated to CRITICAL urgency.\n2. **Logistics Task Dispatched (`task-genkit-5213`):**\n   - Title: Emergency Roof Extraction - 3 Trapped Elderly Victims\n   - Payload: 1 swift water rescue boat, 3 adult life vests, rescue ropes & extraction harnesses, 3 thermal blankets, 1 trauma first-aid kit"
+    }
+  ]
 }
 ```
 
