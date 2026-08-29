@@ -1,0 +1,14 @@
+node_modules
+dist
+.env
+.git
+*.log
+coverage
+.vscode
+public
+src/components
+src/assets
+index.html
+vite.config.ts
+tsconfig.app.json
+eslint.config.js
