@@ -13,6 +13,8 @@
   },
   "dependencies": {
     "@genkit-ai/google-genai": "^1.41.0",
+    "@google-cloud/firestore": "^9.0.0",
+    "@google-cloud/pubsub": "^6.0.1",
     "@types/leaflet": "^1.9.22",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
