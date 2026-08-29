@@ -144,6 +144,14 @@ curl https://<your-cloud-run-url>/api/agent/status
 curl -X POST https://<your-cloud-run-url>/api/reports/batch-sync \
   -H "Content-Type: application/json" \
   -d '{"reports":[{"id":"cloud-test-003","sectorId":"sector-alpha","sanitizedSummary":"Flash flood rescue needed, 3 elderly people trapped on roof","category":"rescue","preliminaryUrgency":"critical","estimatedPeopleCount":3,"timestamp":1234567890,"syncStatus":"offline_queued"}]}'
+
+# 4. Live Firestore Persistence & Task Queue Verification
+curl https://<your-cloud-run-url>/api/tasks
+
+# 5. Live AI Disaster Copilot Query (Gemini 3.7 Flash)
+curl -X POST https://<your-cloud-run-url>/needflareTriageFlow \
+  -H "Content-Type: application/json" \
+  -d '{"data":{"sanitizedReport":"What is the standard water triage quota for 6 trapped citizens?","sectorId":"coordinator-copilot-query","estimatedPeople":1}}'
 ```
 
 **Verified Response (Gemini 3.7 Flash Autonomous Dispatch):**
@@ -158,6 +166,29 @@ curl -X POST https://<your-cloud-run-url>/api/reports/batch-sync \
     }
   ]
 }
+```
+
+**Verified Response (Gemini 3.7 Flash Disaster Copilot):**
+```markdown
+### Emergency Dispatch Response & Humanitarian Water Quota Guidelines
+- **Sector:** `coordinator-copilot-query`
+- **Dominant Need:** Water
+- **Assessed Urgency:** Medium (Triage Logged)
+
+#### Standard Humanitarian Water Quotas (Sphere Standards)
+For 6 trapped / isolated citizens, standard emergency water allocations are calculated as follows:
+
+1. **Immediate Survival Baseline (Drinking Only):**
+   - Rate: 2.5 to 3.0 Liters / person / day
+   - Immediate 24-Hour Payload for 6 People: 18 Liters clean drinking water
+   - 72-Hour Survival Payload for 6 People: 54 Liters clean drinking water
+2. **Basic Disaster Minimum (Drinking + Basic Sanitation / Cooking):**
+   - Rate: 7.5 to 15 Liters / person / day
+   - 72-Hour Sustained Operations for 6 People: 135 – 270 Liters
+3. **Recommended Field Kit for 6 Trapped Individuals:**
+   - 54L potable water (or 6x 10L collapsible jerrycans)
+   - 1 pack of Aquatabs / water purification tablets (sufficient for 100+ L)
+   - 12 packets of Oral Rehydration Salts (ORS) / electrolytes
 ```
 
 ---

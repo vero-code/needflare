@@ -1,4 +1,5 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { Sparkles, Send, Bot, User, X, AlertCircle } from 'lucide-react';
 
 interface AiFieldCopilotModalProps {
@@ -46,19 +47,25 @@ export const AiFieldCopilotModal: React.FC<AiFieldCopilotModalProps> = ({ isOpen
     setInput('');
     setIsLoading(true);
 
-    // Simulate or query copilot response
-    setTimeout(() => {
-      let reply = 'Triage assessment confirmed. In flooded environments, prioritize potable water (3L/person/day) and portable filtration tablets immediately. Mobilize amphibious or high-clearance 4x4 squads.';
-      
-      const lower = textToSend.toLowerCase();
-      if (lower.includes('water') || lower.includes('quota')) {
-        reply = 'For 6 people (including toddlers) in a flooded basement: Allocate a minimum of 18L clean drinking water for 24h, 2 packs of rapid purification tablets, and 1 pediatrics oral rehydration kit.';
-      } else if (lower.includes('insulin')) {
-        reply = 'Insulin stability: Maintain between 2°C–8°C using portable battery-powered coolboxes or insulated gel packs. Prioritize deploying 1kW portable generator to Sector Bravo community clinic.';
-      } else if (lower.includes('route') || lower.includes('alpha')) {
-        reply = 'Sector Alpha advisory: Downtown Miami waterfront has 0.8m storm surge. Avoid Biscayne Blvd underpasses. Use high-elevation MacArthur Causeway access via amphibious rescue boat.';
-      } else if (lower.includes('veo')) {
-        reply = 'Google Veo Universal Visual Guide [veo-water-01] is currently transmitting in continuous broadcast mode over local mesh, providing non-verbal boiling & filtering instructions.';
+    // Real Gemini 3.7 Flash call via GenKit agent server
+    const AGENT_URL = (import.meta as any).env?.VITE_AGENT_URL || 'http://localhost:8080';
+    try {
+      const response = await fetch(`${AGENT_URL}/needflareTriageFlow`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          data: {
+            sanitizedReport: textToSend,
+            sectorId: 'coordinator-copilot-query',
+            estimatedPeople: 1,
+          },
+        }),
+      });
+
+      let reply = 'Gemini agent offline — check server connection.';
+      if (response.ok) {
+        const data = await response.json();
+        reply = data.result?.agentReasoning || 'Agent processed the request but returned no reasoning.';
       }
 
       const botMsg: Message = {
@@ -67,9 +74,19 @@ export const AiFieldCopilotModal: React.FC<AiFieldCopilotModalProps> = ({ isOpen
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };
       setMessages((prev) => [...prev, botMsg]);
+    } catch {
+      // Fallback if server is completely unreachable
+      const botMsg: Message = {
+        role: 'assistant',
+        text: '⚠️ Gemini 3.7 server unreachable. Start the agent server with `npm run server` on port 8080.',
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      };
+      setMessages((prev) => [...prev, botMsg]);
+    } finally {
       setIsLoading(false);
-    }, 700);
+    }
   };
+
 
   return (
     <div
@@ -188,7 +205,13 @@ export const AiFieldCopilotModal: React.FC<AiFieldCopilotModalProps> = ({ isOpen
                   border: m.role === 'user' ? 'none' : '1px solid #334155',
                 }}
               >
-                {m.text}
+                {m.role === 'assistant' ? (
+                  <div className="markdown-rationale">
+                    <ReactMarkdown>{m.text}</ReactMarkdown>
+                  </div>
+                ) : (
+                  m.text
+                )}
                 <div style={{ fontSize: '0.65rem', color: m.role === 'user' ? '#dbeafe' : '#64748b', marginTop: '4px', textAlign: 'right' }}>
                   {m.time}
                 </div>

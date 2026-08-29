@@ -336,10 +336,10 @@ export const Header: React.FC<HeaderProps> = ({
             )}
           </button>
 
-          {/* AI HQ Button */}
+          {/* AI Copilot Button */}
           <button
             onClick={onOpenCopilot}
-            title="Open Gemini 3.7 Disaster Copilot"
+            title="Open Gemini 3.7 Flash Disaster Copilot"
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -356,7 +356,7 @@ export const Header: React.FC<HeaderProps> = ({
             }}
           >
             <Sparkles size={14} color="#a78bfa" />
-            <span>AI-HQ</span>
+            <span>AI COPILOT</span>
           </button>
 
           {/* PII Filter Button */}
