@@ -13,20 +13,23 @@ import {
   RefreshCw,
 } from 'lucide-react';
 
-export type NetworkMode = 'OFFLINE' | 'WEAK_LORA' | 'BURST_SATELLITE' | 'ONLINE_4G';
-export type DisplayTheme = 'HIGH_CONTRAST_SOLAR' | 'AMOLED_TACTICAL' | 'MONOCHROME_EINK';
+import type { NetworkMode, DisplayTheme } from '../types';
+export type { NetworkMode, DisplayTheme };
 
-interface HeaderProps {
+export interface HeaderProps {
   networkMode: NetworkMode;
   onNetworkModeChange: (mode: NetworkMode) => void;
-  pendingQueueCount: number;
-  isSyncing: boolean;
-  onTriggerSync: () => void;
-  onOpenPiiInspector: () => void;
-  onOpenCopilot: () => void;
-  callsign?: string;
+  pendingQueueCount?: number;
+  isSyncing?: boolean;
+  onTriggerSync?: () => void;
+  onOpenPiiInspector?: () => void;
+  onOpenCopilot?: () => void;
   displayTheme?: DisplayTheme;
   onThemeChange?: (theme: DisplayTheme) => void;
+  activeIncidentsCount?: number;
+  criticalT1Count?: number;
+  logisticsConvoysCount?: number;
+  callsign?: string;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -39,6 +42,9 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenCopilot,
   displayTheme = 'AMOLED_TACTICAL',
   onThemeChange,
+  activeIncidentsCount,
+  criticalT1Count,
+  logisticsConvoysCount,
 }) => {
   const [internalTheme, setInternalTheme] = useState<DisplayTheme>(displayTheme);
   const currentTheme = displayTheme || internalTheme;
@@ -430,7 +436,7 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </header>
 
-      {/* 2. Network Status Sub-Bar */}
+      {/* 2. Unified Network & Operations Telemetry Sub-Bar */}
       <div
         style={{
           background: '#090d16',
@@ -442,9 +448,10 @@ export const Header: React.FC<HeaderProps> = ({
           flexWrap: 'wrap',
           gap: '0.75rem',
           fontSize: '0.75rem',
+          fontFamily: 'monospace',
         }}
       >
-        {/* Left: Dynamic Network Mode Badge & Explanation */}
+        {/* Left: Dynamic Network Mode Badge & Bandwidth */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <span
             style={{
@@ -463,8 +470,38 @@ export const Header: React.FC<HeaderProps> = ({
             {netBadge.icon}
             {netBadge.label}
           </span>
-          <span style={{ color: '#cbd5e1' }}>
+          <span style={{ color: '#cbd5e1', fontSize: '0.74rem' }}>
             {netBadge.desc}
+          </span>
+        </div>
+
+        {/* Center: Live Incident Telemetry Ribbon */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#f59e0b', fontWeight: 700 }}>
+            <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#ef4444', display: 'inline-block' }} />
+            INCIDENTS: <strong style={{ color: '#f8fafc' }}>{activeIncidentsCount ?? 3}</strong>
+          </span>
+
+          <span style={{ color: '#334155' }}>|</span>
+
+          <span
+            style={{
+              background: '#ef444420',
+              border: '1px solid #ef444450',
+              color: '#fca5a5',
+              padding: '1px 7px',
+              borderRadius: '4px',
+              fontWeight: 800,
+              fontSize: '0.7rem',
+            }}
+          >
+            T1 CRITICAL: {criticalT1Count ?? 3} PERS.
+          </span>
+
+          <span style={{ color: '#334155' }}>|</span>
+
+          <span style={{ color: '#94a3b8', fontWeight: 700 }}>
+            CONVOYS: <strong style={{ color: '#38bdf8' }}>{logisticsConvoysCount ?? 4}</strong>
           </span>
         </div>
 
@@ -472,11 +509,11 @@ export const Header: React.FC<HeaderProps> = ({
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#10b981' }}>
             <BatteryCharging size={14} color="#10b981" />
-            <span style={{ fontWeight: 700, fontSize: '0.75rem' }}>BATTERY: 78% (POWER SAVER)</span>
+            <span style={{ fontWeight: 700, fontSize: '0.74rem' }}>BATTERY: 78%</span>
           </div>
           <span style={{ color: '#334155' }}>|</span>
-          <div style={{ color: '#94a3b8', fontSize: '0.75rem' }}>
-            BUFFER: <strong style={{ color: pendingQueueCount > 0 ? '#fbbf24' : '#34d399' }}>{pendingQueueCount} PACKETS</strong>
+          <div style={{ color: '#94a3b8', fontSize: '0.74rem' }}>
+            BUFFER: <strong style={{ color: (pendingQueueCount ?? 0) > 0 ? '#fbbf24' : '#34d399' }}>{pendingQueueCount ?? 0} PACKETS</strong>
           </div>
         </div>
       </div>

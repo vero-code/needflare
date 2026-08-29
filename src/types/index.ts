@@ -1,6 +1,8 @@
 export type NeedCategory = 'water' | 'medical' | 'food' | 'shelter' | 'rescue' | 'power';
 export type EmergencyLevel = 'critical' | 'high' | 'medium' | 'low';
 export type SyncStatus = 'offline_queued' | 'syncing' | 'synced' | 'error';
+export type NetworkMode = 'OFFLINE' | 'WEAK_LORA' | 'BURST_SATELLITE' | 'ONLINE_4G';
+export type DisplayTheme = 'HIGH_CONTRAST_SOLAR' | 'AMOLED_TACTICAL' | 'MONOCHROME_EINK';
 
 export interface RawFieldReport {
   id: string;

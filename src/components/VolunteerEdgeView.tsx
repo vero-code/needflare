@@ -1,18 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { Wifi, WifiOff, Smartphone } from 'lucide-react';
+import { Wifi, WifiOff, Smartphone, Radio } from 'lucide-react';
 import { EdgeGemmaService } from '../services/edgeGemmaService';
 import { ReportInputForm, type FormReportPayload } from './ReportInputForm';
 import { ScrubbedReportCard } from './ScrubbedReportCard';
 import { OfflineQueueList } from './OfflineQueueList';
-import type { RawFieldReport, AnonymizedReport } from '../types';
+import type { RawFieldReport, AnonymizedReport, NetworkMode } from '../types';
 
 interface VolunteerEdgeViewProps {
+  networkMode: NetworkMode;
   onSyncBatchToCloud: (reports: AnonymizedReport[]) => void;
   onQueueChange?: () => void;
 }
 
-export const VolunteerEdgeView: React.FC<VolunteerEdgeViewProps> = ({ onSyncBatchToCloud, onQueueChange }) => {
-  const [isOnline, setIsOnline] = useState<boolean>(false);
+export const VolunteerEdgeView: React.FC<VolunteerEdgeViewProps> = ({
+  networkMode,
+  onSyncBatchToCloud,
+  onQueueChange,
+}) => {
   const [volunteerId] = useState<string>('VOLUNTEER-77-ALPHA');
   const [isProcessingGemma, setIsProcessingGemma] = useState<boolean>(false);
   const [lastProcessedReport, setLastProcessedReport] = useState<AnonymizedReport | null>(null);
@@ -71,27 +75,66 @@ export const VolunteerEdgeView: React.FC<VolunteerEdgeViewProps> = ({ onSyncBatc
           </div>
         </div>
 
-        {/* Network Toggle Button */}
-        <button
-          onClick={() => setIsOnline(!isOnline)}
+        {/* Network Status Badge (Synchronized with Global Header) */}
+        <div
           style={{
             display: 'flex',
             alignItems: 'center',
             gap: '6px',
-            padding: '6px 12px',
+            padding: '6px 14px',
             borderRadius: '20px',
-            border: 'none',
-            cursor: 'pointer',
-            fontWeight: 600,
-            fontSize: '0.85rem',
-            background: isOnline ? '#10b981' : '#64748b',
-            color: '#ffffff',
-            transition: 'all 0.15s ease',
+            fontWeight: 800,
+            fontSize: '0.78rem',
+            fontFamily: 'monospace',
+            background:
+              networkMode === 'OFFLINE'
+                ? '#ef444420'
+                : networkMode === 'WEAK_LORA'
+                ? '#f59e0b20'
+                : networkMode === 'BURST_SATELLITE'
+                ? '#0284c720'
+                : '#10b98120',
+            color:
+              networkMode === 'OFFLINE'
+                ? '#f87171'
+                : networkMode === 'WEAK_LORA'
+                ? '#fbbf24'
+                : networkMode === 'BURST_SATELLITE'
+                ? '#38bdf8'
+                : '#34d399',
+            border: `1px solid ${
+              networkMode === 'OFFLINE'
+                ? '#ef444450'
+                : networkMode === 'WEAK_LORA'
+                ? '#f59e0b50'
+                : networkMode === 'BURST_SATELLITE'
+                ? '#0284c750'
+                : '#10b98150'
+            }`,
           }}
         >
-          {isOnline ? <Wifi size={16} /> : <WifiOff size={16} />}
-          {isOnline ? 'Network: 4G Online' : 'Network: Offline'}
-        </button>
+          {networkMode === 'OFFLINE' ? (
+            <>
+              <WifiOff size={14} />
+              <span>OFFLINE (LOCAL BUFFER)</span>
+            </>
+          ) : networkMode === 'WEAK_LORA' ? (
+            <>
+              <Radio size={14} />
+              <span>UPLINK: LORA MESH</span>
+            </>
+          ) : networkMode === 'BURST_SATELLITE' ? (
+            <>
+              <Radio size={14} />
+              <span>UPLINK: SATELLITE BURST</span>
+            </>
+          ) : (
+            <>
+              <Wifi size={14} />
+              <span>UPLINK: 4G ONLINE</span>
+            </>
+          )}
+        </div>
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
@@ -107,7 +150,7 @@ export const VolunteerEdgeView: React.FC<VolunteerEdgeViewProps> = ({ onSyncBatc
         {/* 3. Offline Queue Component */}
         <OfflineQueueList
           queue={offlineQueue}
-          isOnline={isOnline}
+          isOnline={networkMode !== 'OFFLINE'}
           onSync={handleSyncToCloud}
         />
       </div>

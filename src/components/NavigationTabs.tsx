@@ -178,19 +178,6 @@ export const NavigationTabs: React.FC<NavigationTabsProps> = ({
           </span>
         </button>
       </div>
-
-      <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600 }}>
-        Active Mode:{' '}
-        <span style={{ color: '#38bdf8' }}>
-          {activeTab === 'field'
-            ? '1. Field Terminal (Gemma On-Device)'
-            : activeTab === 'coordinator'
-            ? '2. HQ Incident Map & Triage'
-            : activeTab === 'buffer'
-            ? '3. Store & Forward Mesh Relay'
-            : '4. Universal Broadcast'}
-        </span>
-      </div>
     </div>
   );
 };

@@ -27,6 +27,7 @@ export function App() {
   const [tasks, setTasks] = useState<LogisticsTask[]>(CloudGeminiAgent.initialTasks);
   const [guides, setGuides] = useState<VeoVisualGuide[]>(VeoService.initialGuides);
   const [liveSyncNotice, setLiveSyncNotice] = useState<string | null>(null);
+  const [lastSyncTime, setLastSyncTime] = useState<string | null>(null);
 
   const refreshPendingCount = () => {
     const queue = EdgeGemmaService.getOfflineQueue();
@@ -64,6 +65,7 @@ export function App() {
     }
 
     refreshPendingCount();
+    setLastSyncTime(new Date().toLocaleTimeString());
     setTimeout(() => {
       setLiveSyncNotice(null);
     }, 4500);
@@ -111,6 +113,9 @@ export function App() {
         onOpenCopilot={() => setIsCopilotOpen(true)}
         displayTheme={displayTheme}
         onThemeChange={setDisplayTheme}
+        activeIncidentsCount={offlineReports.length || 3}
+        criticalT1Count={offlineReports.filter((r) => r.preliminaryUrgency === 'critical').length || 3}
+        logisticsConvoysCount={tasks.length || 4}
       />
 
       {/* Cloud Pub/Sub Notification Toast */}
@@ -152,12 +157,11 @@ export function App() {
         )}
 
         {activeTab === 'field' && (
-          <div style={{ maxWidth: '900px', width: '100%', margin: '0 auto' }}>
-            <VolunteerEdgeView
-              onSyncBatchToCloud={handleSyncBatchToCloud}
-              onQueueChange={refreshPendingCount}
-            />
-          </div>
+          <VolunteerEdgeView
+            networkMode={networkMode}
+            onSyncBatchToCloud={handleSyncBatchToCloud}
+            onQueueChange={refreshPendingCount}
+          />
         )}
 
         {activeTab === 'buffer' && (
