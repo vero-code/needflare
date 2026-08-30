@@ -279,12 +279,12 @@ export const VeoBroadcastGallery: React.FC<VeoBroadcastGalleryProps> = ({
                 />
               </div>
             ) : (
-              <div style={{ marginBottom: '1rem', borderRadius: '8px', overflow: 'hidden', border: '1px solid #334155' }}>
-                <img
-                  src={activeGuideModal.thumbnailUrl}
-                  alt={activeGuideModal.title}
-                  style={{ width: '100%', maxHeight: '180px', objectFit: 'cover', display: 'block' }}
-                />
+              <div style={{ marginBottom: '1rem', padding: '2rem 1rem', borderRadius: '8px', background: '#020617', border: '1px dashed #8b5cf6', textAlign: 'center' }}>
+                <Sparkles size={32} color="#a78bfa" style={{ margin: '0 auto 8px auto', display: 'block' }} />
+                <h4 style={{ margin: '0 0 4px 0', color: '#f8fafc', fontSize: '0.95rem' }}>AI Video Rendering in Progress...</h4>
+                <p style={{ margin: 0, fontSize: '0.8rem', color: '#94a3b8' }}>
+                  Google Veo 3.1 Fast is synthesizing this non-verbal protocol (~40s). Refresh in a moment!
+                </p>
               </div>
             )}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '1.5rem' }}>
