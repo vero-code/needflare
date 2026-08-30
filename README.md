@@ -1,5 +1,10 @@
 # NeedFlare — Emergency Field Intelligence & Autonomous Logistics Agent
 
+[![Gemini 3.7 Flash](https://img.shields.io/badge/Gemini_3.7_Flash-Autonomous_Agent-8E75C4?style=for-the-badge&logo=googlegemini&logoColor=white)](https://deepmind.google/technologies/gemini/)
+[![Google Gemma 4](https://img.shields.io/badge/Gemma_4-Edge_PII_Scrub-34A853?style=for-the-badge&logo=google&logoColor=white)](https://ai.google.dev/gemma)
+[![Google Veo 3.1](https://img.shields.io/badge/Google_Veo_3.1-Visual_Broadcasts-EA4335?style=for-the-badge&logo=google&logoColor=white)](https://deepmind.google/technologies/veo/)
+[![Google Cloud Run](https://img.shields.io/badge/Google_Cloud_Run-Serverless-4285F4?style=for-the-badge&logo=googlecloud&logoColor=white)](https://cloud.google.com/run)
+
 > **Submission for Google Cloud: All Things Agentic Hackathon**  
 > **Track:** *The Taskmaster* (Autonomous event-driven workflows, asynchronous routing, and proactive multi-tool execution)  
 > **Bonus Integrations:** Google Gemma (Edge PII Sanitization) & Google Veo (Non-Verbal Instructional Broadcasts)
@@ -38,6 +43,14 @@ In catastrophic disaster zones (hurricanes, earthquakes, flash floods), cellular
 ---
 
 ## 🛠️ Technology Stack
+
+- **Gemini 3.7 Flash via GenKit** (agent reasoning + multi-tool invocation)
+- **Gemma 4 / Gemma 3-27B-IT** (`models/gemma-4-26b-a4b-it`) (on-device report classification & edge PII sanitization)
+- **Google Cloud Run** (serverless containerized agent backend)
+- **Google Cloud Pub/Sub** (asynchronous event ingestion pipeline)
+- **Google Cloud Firestore** (persistent report + task + visual guide state)
+- **Google Veo 3.1 Fast / Veo 2** (`models/veo-3.1-fast-generate-preview`) (universal survival video generation)
+- **React 19 + TypeScript + Vite** (tactical coordinator dashboard & edge volunteer UI)
 
 | Layer | Google Technology | Role |
 |---|---|---|
@@ -202,42 +215,47 @@ NeedFlare tightly integrates three state-of-the-art Google AI models into an end
 
 ---
 
-## 🚀 Local Development
+## 🚀 Local Setup & Spin-Up (< 10 Minutes)
 
-### Prerequisites
-- Node.js v20+
-- Google Cloud CLI (`gcloud`) authenticated (`gcloud auth application-default login`)
+Anyone can spin up and verify the entire NeedFlare system locally in under 10 minutes:
 
-### Setup
-1. **Clone repository:**
-   ```bash
-   git clone https://github.com/vero-code/needflare.git
-   cd needflare
-   ```
+### 1. Clone & Install
+```bash
+git clone https://github.com/vero-code/needflare.git
+cd needflare
+npm install
+```
 
-2. **Install dependencies:**
-   ```bash
-   npm install
-   ```
+### 2. Configure Environment
+```bash
+cp .env.example .env
+```
+Fill in `GEMINI_API_KEY` and `VITE_GEMINI_API_KEY` in `.env` (along with `GOOGLE_CLOUD_PROJECT` if syncing to live Firestore/PubSub).
 
-3. **Configure Environment:**
-   Copy `.env.example` to `.env`:
-   ```bash
-   cp .env.example .env
-   ```
-   Fill in your `GEMINI_API_KEY`, `GOOGLE_CLOUD_PROJECT=<your-project-id>`, and `FIRESTORE_DATABASE_ID=needflare-db`.
+### 3. Launch Services
+```bash
+# Terminal 1: Start Agent Backend (:8080)
+npm run server
 
-4. **Run Agent Server:**
-   ```bash
-   npm run server
-   ```
-   *Runs on `http://localhost:8080` (GenKit Agent Flow + Express endpoints)*
+# Terminal 2: Start Tactical Dashboard (:5173)
+npm run dev
+```
+Open **`http://localhost:5173`** in your browser.
 
-5. **Run Frontend Application:**
-   ```bash
-   npm run dev
-   ```
-   *Runs on `http://localhost:5173`*
+---
+
+## ☁️ Cloud Deployment (Google Cloud Run)
+
+Deploy the containerized serverless agent directly to Google Cloud Run:
+
+```bash
+gcloud run deploy needflare-agent \
+  --source . \
+  --region us-central1 \
+  --allow-unauthenticated \
+  --set-env-vars GOOGLE_CLOUD_PROJECT=<your-project-id>,FIRESTORE_DATABASE_ID=needflare-db \
+  --set-secrets GEMINI_API_KEY=GEMINI_API_KEY:latest
+```
 
 ---
 
@@ -256,6 +274,16 @@ gcloud firestore databases list
 # Test Direct Gemini API Access
 curl -s "https://generativelanguage.googleapis.com/v1beta/models?key=$GEMINI_API_KEY"
 ```
+
+---
+
+## 🔮 Production Roadmap
+
+1. **Persistent Google Cloud Storage (GCS) Multi-Region Buckets:** Fully automate direct uploads to `gs://needflare-veo-assets` with public signed URLs and Cloud CDN to persist media independently of server container lifecycles.
+2. **Physical LoRa SX1262 Transceiver Hardware:** Connect physical packet radio transceivers via the Web Serial API for field tests with off-grid LoRa mesh repeaters.
+3. **Multi-Language Audio Companion Tracks:** Leverage Gemini 3.7 Voice generation to synthesize optional spoken emergency broadcasts in local dialects alongside Veo's non-verbal visuals.
+
+---
 
 ## 📝 License
 
