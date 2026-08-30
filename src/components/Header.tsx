@@ -35,16 +35,16 @@ export interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({
   networkMode,
   onNetworkModeChange,
-  pendingQueueCount,
-  isSyncing,
+  pendingQueueCount = 0,
+  isSyncing = false,
   onTriggerSync,
   onOpenPiiInspector,
   onOpenCopilot,
   displayTheme = 'AMOLED_TACTICAL',
   onThemeChange,
-  activeIncidentsCount,
-  criticalT1Count,
-  logisticsConvoysCount,
+  activeIncidentsCount = 3,
+  criticalT1Count = 14,
+  logisticsConvoysCount = 4,
 }) => {
   const [internalTheme, setInternalTheme] = useState<DisplayTheme>(displayTheme);
   const currentTheme = displayTheme || internalTheme;

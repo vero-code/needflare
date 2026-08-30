@@ -1,4 +1,4 @@
-import type { AnonymizedReport, SectorZone, LogisticsTask, VeoVisualGuide, NeedCategory, EmergencyLevel } from '../types';
+import type { AnonymizedReport, SectorZone, LogisticsTask, NeedCategory } from '../types';
 
 export class CloudGeminiAgent {
   public static initialSectors: SectorZone[] = [
@@ -123,7 +123,7 @@ export class CloudGeminiAgent {
   public static async processCloudTriage(
     newReport: AnonymizedReport,
     currentSectors: SectorZone[],
-    currentTasks: LogisticsTask[]
+    _currentTasks: LogisticsTask[]
   ): Promise<{
     updatedSectors: SectorZone[];
     generatedTask?: LogisticsTask;

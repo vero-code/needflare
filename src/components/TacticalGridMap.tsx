@@ -1,5 +1,4 @@
 ﻿import React, { useState } from 'react';
-import { Map, Zap } from 'lucide-react';
 import type { SectorZone, LogisticsTask } from '../types';
 
 interface TacticalGridMapProps {
@@ -171,8 +170,8 @@ const SAMPLE_REPORTS = [
 ];
 
 export const TacticalGridMap: React.FC<TacticalGridMapProps> = ({
-  sectors = [],
-  tasks = [],
+  sectors: _sectors = [],
+  tasks: _tasks = [],
   onSelectSector,
 }) => {
   const [selectedSectorId, setSelectedSectorId] = useState<string>('BRAVO-2');

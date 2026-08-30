@@ -1,21 +1,15 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import {
   Radio,
   QrCode,
-  Download,
   Upload,
-  RefreshCw,
   Trash2,
-  CheckCircle,
-  AlertCircle,
   Copy,
   Check,
-  Shield,
-  Layers,
   Send,
   X,
 } from 'lucide-react';
-import type { AnonymizedReport, NetworkMode } from '../types';
+import type { AnonymizedReport } from '../types';
 import { EdgeGemmaService } from '../services/edgeGemmaService';
 
 interface OfflineSyncQueueProps {

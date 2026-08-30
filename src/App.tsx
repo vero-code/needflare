@@ -27,7 +27,6 @@ export function App() {
   const [tasks, setTasks] = useState<LogisticsTask[]>(CloudGeminiAgent.initialTasks);
   const [guides, setGuides] = useState<VeoVisualGuide[]>(VeoService.initialGuides);
   const [liveSyncNotice, setLiveSyncNotice] = useState<string | null>(null);
-  const [lastSyncTime, setLastSyncTime] = useState<string | null>(null);
 
   const refreshPendingCount = () => {
     const queue = EdgeGemmaService.getOfflineQueue();
@@ -119,7 +118,6 @@ export function App() {
     }
 
     refreshPendingCount();
-    setLastSyncTime(new Date().toLocaleTimeString());
     setTimeout(() => {
       setLiveSyncNotice(null);
     }, 4500);

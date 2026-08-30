@@ -1,5 +1,5 @@
 ﻿import React from 'react';
-import { ShieldCheck, Lock, CheckCircle2, X, EyeOff } from 'lucide-react';
+import { ShieldCheck, Lock, CheckCircle2, X } from 'lucide-react';
 import { EdgeGemmaService } from '../services/edgeGemmaService';
 
 interface PiiInspectorModalProps {

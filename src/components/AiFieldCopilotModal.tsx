@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { Sparkles, Send, Bot, User, X, AlertCircle } from 'lucide-react';
+import { Sparkles, Send, Bot, User, X } from 'lucide-react';
 
 interface AiFieldCopilotModalProps {
   isOpen: boolean;
