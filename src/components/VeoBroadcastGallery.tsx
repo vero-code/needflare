@@ -96,108 +96,124 @@ export const VeoBroadcastGallery: React.FC<VeoBroadcastGalleryProps> = ({
       </div>
 
       {/* Cards Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
-        {guides.map((guide) => (
-          <div
-            key={guide.id}
-            style={{
-              background: '#0f172a',
-              borderRadius: '8px',
-              overflow: 'hidden',
-              border: guide.isBroadcasting ? '1px solid #8b5cf6' : '1px solid #334155',
-              display: 'flex',
-              flexDirection: 'column',
-            }}
-          >
-            {/* Thumbnail Header */}
-            <div style={{ position: 'relative', height: '140px', background: '#020617' }}>
-              <img
-                src={guide.thumbnailUrl}
-                alt={guide.title}
-                style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.8 }}
-              />
-              <button
-                onClick={() => setActiveGuideModal(guide)}
-                style={{
-                  position: 'absolute',
-                  inset: 0,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  background: 'rgba(0,0,0,0.4)',
-                  border: 'none',
-                  color: '#fff',
-                  cursor: 'pointer',
-                }}
-              >
-                <PlayCircle size={42} />
-              </button>
-              {guide.isBroadcasting && (
-                <span
-                  style={{
-                    position: 'absolute',
-                    top: '8px',
-                    right: '8px',
-                    background: '#8b5cf6',
-                    color: '#fff',
-                    padding: '2px 8px',
-                    borderRadius: '12px',
-                    fontSize: '0.7rem',
-                    fontWeight: 700,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                  }}
-                >
-                  <Radio size={12} /> ON AIR
-                </span>
-              )}
-            </div>
-
-            {/* Content */}
-            <div style={{ padding: '1rem', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-              <div>
-                <h4 style={{ margin: '0 0 8px 0', fontSize: '0.95rem', fontWeight: 600, color: '#f8fafc' }}>
-                  {guide.title}
-                </h4>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '10px' }}>
-                  {guide.keyVisualSteps.slice(0, 3).map((step, idx) => (
-                    <span key={idx} style={{ fontSize: '0.75rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <CheckCircle2 size={12} color="#8b5cf6" /> {step}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {/* Actions */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px', paddingTop: '8px', borderTop: '1px solid #1e293b' }}>
+      {guides.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '3.5rem 1rem', background: '#0f172a', borderRadius: '12px', border: '1px dashed #334155' }}>
+          <Video size={40} color="#8b5cf6" style={{ margin: '0 auto 12px auto', opacity: 0.8 }} />
+          <h3 style={{ margin: '0 0 6px 0', fontSize: '1.1rem', color: '#f8fafc' }}>No Veo Guides Generated Yet</h3>
+          <p style={{ margin: 0, fontSize: '0.85rem', color: '#94a3b8', maxWidth: '440px', marginInline: 'auto' }}>
+            Select a crisis category above and click <strong>Generate Veo Video</strong> to synthesize a real-time non-verbal guide with Google Veo and persist it to Firestore.
+          </p>
+        </div>
+      ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
+          {guides.map((guide) => (
+            <div
+              key={guide.id}
+              style={{
+                background: '#0f172a',
+                borderRadius: '8px',
+                overflow: 'hidden',
+                border: guide.isBroadcasting ? '1px solid #8b5cf6' : '1px solid #334155',
+                display: 'flex',
+                flexDirection: 'column',
+              }}
+            >
+              {/* Thumbnail Header */}
+              <div style={{ position: 'relative', height: '140px', background: '#020617' }}>
+                {guide.thumbnailUrl ? (
+                  <img
+                    src={guide.thumbnailUrl}
+                    alt={guide.title}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.8 }}
+                  />
+                ) : (
+                  <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Video size={36} color="#8b5cf6" style={{ opacity: 0.6 }} />
+                  </div>
+                )}
                 <button
                   onClick={() => setActiveGuideModal(guide)}
-                  style={{ background: 'transparent', border: 'none', color: '#38bdf8', fontSize: '0.8rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
-                >
-                  <Eye size={14} /> Full Visual Steps
-                </button>
-
-                <button
-                  onClick={() => onToggleBroadcast(guide.id)}
                   style={{
-                    padding: '4px 10px',
-                    borderRadius: '6px',
-                    fontSize: '0.75rem',
+                    position: 'absolute',
+                    inset: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: 'rgba(0,0,0,0.4)',
                     border: 'none',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    background: guide.isBroadcasting ? '#ef4444' : '#334155',
                     color: '#fff',
+                    cursor: 'pointer',
                   }}
                 >
-                  {guide.isBroadcasting ? 'Stop Broadcast' : 'Broadcast to Zone'}
+                  <PlayCircle size={42} />
                 </button>
+                {guide.isBroadcasting && (
+                  <span
+                    style={{
+                      position: 'absolute',
+                      top: '8px',
+                      right: '8px',
+                      background: '#8b5cf6',
+                      color: '#fff',
+                      padding: '2px 8px',
+                      borderRadius: '12px',
+                      fontSize: '0.7rem',
+                      fontWeight: 700,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                    }}
+                  >
+                    <Radio size={12} /> ON AIR
+                  </span>
+                )}
+              </div>
+
+              {/* Content */}
+              <div style={{ padding: '1rem', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                <div>
+                  <h4 style={{ margin: '0 0 8px 0', fontSize: '0.95rem', fontWeight: 600, color: '#f8fafc' }}>
+                    {guide.title}
+                  </h4>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '10px' }}>
+                    {guide.keyVisualSteps.slice(0, 3).map((step, idx) => (
+                      <span key={idx} style={{ fontSize: '0.75rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <CheckCircle2 size={12} color="#8b5cf6" /> {step}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px', paddingTop: '8px', borderTop: '1px solid #1e293b' }}>
+                  <button
+                    onClick={() => setActiveGuideModal(guide)}
+                    style={{ background: 'transparent', border: 'none', color: '#38bdf8', fontSize: '0.8rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+                  >
+                    <Eye size={14} /> Full Visual Steps
+                  </button>
+
+                  <button
+                    onClick={() => onToggleBroadcast(guide.id)}
+                    style={{
+                      padding: '4px 10px',
+                      borderRadius: '6px',
+                      fontSize: '0.75rem',
+                      border: 'none',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      background: guide.isBroadcasting ? '#ef4444' : '#334155',
+                      color: '#fff',
+                    }}
+                  >
+                    {guide.isBroadcasting ? 'Stop Broadcast' : 'Broadcast to Zone'}
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {/* Modal / Step Viewer */}
       {activeGuideModal && (

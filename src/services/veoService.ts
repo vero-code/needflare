@@ -3,15 +3,24 @@ import type { VeoVisualGuide, NeedCategory } from '../types';
 export class VeoService {
   public static initialGuides: VeoVisualGuide[] = [];
 
-  /**
-   * Simulating generation of a new video via Google Veo API
-   */
   public static async generateNewVeoGuide(
     category: NeedCategory,
     customPrompt: string
   ): Promise<VeoVisualGuide> {
-    // Simulating rendering of the Veo video model
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    const AGENT_URL = (import.meta as any).env?.VITE_AGENT_URL || 'http://localhost:8080';
+    try {
+      const res = await fetch(`${AGENT_URL}/api/veo/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ category, prompt: customPrompt }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.guide) return data.guide;
+      }
+    } catch (e) {
+      console.warn('Backend Veo call failed:', e);
+    }
 
     const id = `veo-${category}-${Date.now().toString().slice(-4)}`;
     return {
@@ -19,7 +28,8 @@ export class VeoService {
       title: `Emergency Protocol: ${category.toUpperCase()}`,
       targetCrisis: category,
       generatedPrompt: customPrompt,
-      thumbnailUrl: 'https://images.unsplash.com/photo-1516738901171-8eb4fc13bd20?w=800&auto=format&fit=crop&q=80',
+      thumbnailUrl: '',
+      videoUrl: '',
       keyVisualSteps: [
         '1. Universal step: Assess immediate surroundings for safety',
         '2. Universal step: Apply standard non-verbal disaster protocol',

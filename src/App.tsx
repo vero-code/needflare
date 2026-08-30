@@ -69,6 +69,17 @@ export function App() {
         }
       })
       .catch(() => console.warn('⚠️ Could not load reports from Cloud Run — using local queue'));
+
+    // Fetch Veo guides from Firestore
+    fetch(`${AGENT_URL}/api/veo/guides`)
+      .then(r => r.json())
+      .then(data => {
+        if (Array.isArray(data.guides) && data.guides.length > 0) {
+          setGuides(data.guides);
+          console.log(`✅ Loaded ${data.guides.length} Veo guide(s) from Firestore`);
+        }
+      })
+      .catch(() => console.warn('⚠️ Could not load Veo guides from Firestore'));
   }, []);
 
   // Merge server reports + local offline queue reports (deduplicate by id)
