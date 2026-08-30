@@ -1,8 +1,11 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import https from 'https';
+import fs from 'fs';
+import path from 'path';
 import { needflareTriageFlow } from './agent/needflareAgent.js';
-import { saveReport, saveTask, getFirestoreStatus, getReports, getTasks } from './server/firestore.js';
+import { saveReport, saveTask, getFirestoreStatus, getReports, getTasks, saveVeoGuide, getVeoGuides } from './server/firestore.js';
 import { publishReport, getPubSubStatus } from './server/pubsub.js';
 import type { AnonymizedReport } from './types/index.js';
 
@@ -13,6 +16,7 @@ const PORT = process.env.PORT || 8080;
 
 app.use(cors({ origin: '*' }));
 app.use(express.json({ limit: '2mb' }));
+app.use('/videos', express.static(path.resolve('public/videos')));
 
 // ─── Existing triage endpoint (unchanged) ───────────────────────────────────
 app.post('/needflareTriageFlow', async (req, res) => {
@@ -139,6 +143,132 @@ app.get('/health', (_, res) => {
     framework: 'GenKit + Google Cloud Run',
     port: PORT,
   });
+});
+
+// ─── GET: List Veo guides from Firestore ─────────────────────────────────────
+app.get('/api/veo/guides', async (_, res) => {
+  try {
+    const guides = await getVeoGuides();
+    res.json({ guides, total: guides.length });
+  } catch (error: any) {
+    res.status(500).json({ error: error?.message || 'Failed to fetch Veo guides' });
+  }
+});
+
+// ─── Helper: Poll Google Veo in background & download MP4 ───────────────────
+function pollAndDownloadVeo(operationName: string, guideData: any, apiKey: string) {
+  const pollInterval = setInterval(() => {
+    https.get(`https://generativelanguage.googleapis.com/v1beta/${operationName}?key=${apiKey}`, (res) => {
+      let data = '';
+      res.on('data', (c) => (data += c));
+      res.on('end', async () => {
+        try {
+          const op = JSON.parse(data);
+          if (op.done) {
+            clearInterval(pollInterval);
+            console.log(`✨ [Google Veo 3.1] Generation complete for ${guideData.id}!`);
+            const videoUri = op.response?.generateVideoResponse?.generatedSamples?.[0]?.video?.uri;
+            if (videoUri) {
+              const videoDir = path.resolve('public/videos');
+              if (!fs.existsSync(videoDir)) fs.mkdirSync(videoDir, { recursive: true });
+              const filename = `${guideData.id}.mp4`;
+              const dest = path.join(videoDir, filename);
+
+              const file = fs.createWriteStream(dest);
+              https.get(`${videoUri}&alt=media&key=${apiKey}`, (downloadRes) => {
+                downloadRes.pipe(file);
+                file.on('finish', async () => {
+                  file.close();
+                  console.log(`📥 [Google Veo 3.1] Video saved to ${dest}`);
+                  // Update Firestore record with ready status and real video URL!
+                  await saveVeoGuide({
+                    ...guideData,
+                    videoUrl: `/videos/${filename}`,
+                    status: 'ready',
+                    updatedAt: Date.now(),
+                  });
+                });
+              });
+            }
+          }
+        } catch (err) {
+          console.error('Veo polling parse error:', err);
+        }
+      });
+    }).on('error', (e) => console.error('Veo poll error:', e));
+  }, 6000);
+}
+
+// ─── POST: Trigger Google Veo 3.1 generation ─────────────────────────────────
+app.post('/api/veo/generate', async (req, res) => {
+  try {
+    const { category, prompt } = req.body;
+    const effectiveCategory = category || 'water';
+    const effectivePrompt = prompt || `Universal step-by-step non-verbal survival guide for ${effectiveCategory}, 4K.`;
+    const guideId = `veo-${effectiveCategory}-${Date.now().toString().slice(-4)}`;
+
+    const newGuide = {
+      id: guideId,
+      title: `Emergency Protocol: ${effectiveCategory.toUpperCase()}`,
+      targetCrisis: effectiveCategory,
+      generatedPrompt: effectivePrompt,
+      thumbnailUrl: '',
+      videoUrl: '',
+      keyVisualSteps: [
+        `1. Execute standard ${effectiveCategory} safety protocol`,
+        '2. Step-by-step universal non-verbal action',
+        '3. Signal nearby teams using reflective marker',
+      ],
+      isBroadcasting: true,
+      status: 'generating',
+      createdAt: Date.now(),
+    };
+
+    // Save initial record in Firestore
+    await saveVeoGuide(newGuide);
+
+    const apiKey = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
+    const postData = JSON.stringify({
+      instances: [{ prompt: effectivePrompt }],
+      parameters: { aspectRatio: '16:9' },
+    });
+
+    const veoReq = https.request({
+      hostname: 'generativelanguage.googleapis.com',
+      path: `/v1beta/models/veo-3.1-fast-generate-preview:predictLongRunning?key=${apiKey}`,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(postData),
+      },
+    }, (veoRes) => {
+      let data = '';
+      veoRes.on('data', (c) => (data += c));
+      veoRes.on('end', () => {
+        try {
+          const parsed = JSON.parse(data);
+          const opName = parsed.name;
+          if (opName) {
+            console.log(`🎬 [Google Veo 3.1 Fast] Operation started: ${opName}`);
+            pollAndDownloadVeo(opName, newGuide, apiKey!);
+          } else {
+            console.error('Veo returned unexpected response:', parsed);
+          }
+        } catch (e) {
+          console.error('Veo start parse error:', e);
+        }
+      });
+    });
+
+    veoReq.on('error', (e) => console.error('Veo request error:', e));
+    veoReq.write(postData);
+    veoReq.end();
+
+    res.json({ guide: newGuide, status: 'generating' });
+  } catch (error: any) {
+    console.error('Veo generate error:', error);
+    res.status(500).json({ error: error?.message });
+  }
 });
 
 app.listen(PORT, () => {

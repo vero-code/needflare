@@ -229,6 +229,26 @@ export const VeoBroadcastGallery: React.FC<VeoBroadcastGalleryProps> = ({
             <p style={{ fontSize: '0.85rem', color: '#94a3b8', marginBottom: '1rem' }}>
               <strong>Veo Universal Non-Verbal Prompt:</strong> {activeGuideModal.generatedPrompt}
             </p>
+            {activeGuideModal.videoUrl ? (
+              <div style={{ marginBottom: '1rem', borderRadius: '8px', overflow: 'hidden', background: '#000', border: '1px solid #8b5cf6' }}>
+                <video
+                  src={activeGuideModal.videoUrl}
+                  controls
+                  autoPlay
+                  loop
+                  playsInline
+                  style={{ width: '100%', maxHeight: '260px', display: 'block' }}
+                />
+              </div>
+            ) : (
+              <div style={{ marginBottom: '1rem', borderRadius: '8px', overflow: 'hidden', border: '1px solid #334155' }}>
+                <img
+                  src={activeGuideModal.thumbnailUrl}
+                  alt={activeGuideModal.title}
+                  style={{ width: '100%', maxHeight: '180px', objectFit: 'cover', display: 'block' }}
+                />
+              </div>
+            )}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '1.5rem' }}>
               {activeGuideModal.keyVisualSteps.map((step, idx) => (
                 <div key={idx} style={{ background: '#1e293b', padding: '8px 12px', borderRadius: '6px', fontSize: '0.85rem', color: '#f8fafc' }}>

@@ -76,3 +76,26 @@ export async function getTasks(): Promise<any[]> {
     return [];
   }
 }
+
+export async function saveVeoGuide(guide: any): Promise<void> {
+  const firestore = getDb();
+  if (!firestore) return;
+  try {
+    await firestore.collection('veo_guides').doc(guide.id).set(guide);
+    console.log(`✅ [Firestore] Veo guide ${guide.id} saved`);
+  } catch (err) {
+    console.error('❌ [Firestore] saveVeoGuide failed:', err);
+  }
+}
+
+export async function getVeoGuides(): Promise<any[]> {
+  const firestore = getDb();
+  if (!firestore) return [];
+  try {
+    const snap = await firestore.collection('veo_guides').orderBy('createdAt', 'desc').limit(20).get();
+    return snap.docs.map(d => d.data());
+  } catch (err) {
+    console.error('❌ [Firestore] getVeoGuides failed:', err);
+    return [];
+  }
+}
