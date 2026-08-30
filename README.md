@@ -14,14 +14,14 @@ In catastrophic disaster zones (hurricanes, earthquakes, flash floods), cellular
 1. **Edge PII Stripping (Gemma Edge):** Local volunteers draft reports on-device; phone numbers, names, and precise coordinates are scrubbed into secure sector boundaries before entering public or mesh airwaves.
 2. **Asynchronous Cloud Pipeline (Google Cloud Pub/Sub):** Reports buffer offline in local queues and burst-sync across LoRa mesh, satellite, or restored 4G pipelines into Google Cloud Pub/Sub.
 3. **Autonomous Taskmaster Dispatcher (Gemini 3.7 Flash via GenKit):** An autonomous backend agent evaluates disaster triage reports asynchronously, calls specialized tools to update tactical sectors, computes survivor payloads, and auto-dispatches supply convoys without manual human bottlenecking.
-4. **Universal Visual Guidance (Google Veo):** For critical survival scenarios (water decontamination, trauma wound care, emergency shelter), the agent triggers zero-text, 4K instructional survival broadcasts viewable by anyone regardless of language.
+4. **Universal Visual Guidance (Google Veo):** For critical survival scenarios (water decontamination, trauma wound care, emergency shelter), the agent triggers zero-text, high-contrast instructional survival broadcasts viewable by anyone regardless of language.
 
 ---
 
 ## 🏗️ Architecture
 
 ```
-[Field Volunteers] ──(Edge Gemma)──► [Offline Queue] ──► [Cloud Pub/Sub: needflare-reports]
+[Field Volunteers] ──(Edge Gemma 4)──► [Offline Queue] ──► [Cloud Pub/Sub: needflare-reports]
                                                                   │
                                                                   ▼
 [Coordinator Dashboard] ◄── [Firestore: needflare-db] ◄── [Cloud Run: NeedFlare Agent]
@@ -32,7 +32,7 @@ In catastrophic disaster zones (hurricanes, earthquakes, flash floods), cellular
                                                        └── triggerVeoVisualGuideTool
                                                                   │
                                                                   ▼
-                                                      [Google Veo 4K Broadcast]
+                                                   [Google Veo 3.1 Fast Broadcast]
 ```
 
 ---
@@ -43,10 +43,10 @@ In catastrophic disaster zones (hurricanes, earthquakes, flash floods), cellular
 |---|---|---|
 | **Core Reasoning Agent** | **Gemini 3.7 Flash** | Event triage, severity assessment, rationale generation, tool orchestration |
 | **Agent Framework** | **GenKit v1.41** (`@genkit-ai/google-genai`) | Flow definition, schema validation (Zod), multi-tool execution |
-| **Edge Intelligence** | **Gemma** | Local on-device classification & PII sanitization |
-| **Visual Instruction Engine**| **Google Veo** | Universal non-verbal survival video generation |
+| **Edge Intelligence** | **Gemma 4** (`models/gemma-4-26b-a4b-it`) | Local on-device classification & PII sanitization |
+| **Visual Instruction Engine**| **Google Veo 3.1 Fast** (`models/veo-3.1-fast-generate-preview`) | Universal non-verbal survival video generation |
 | **Event Pipeline** | **Google Cloud Pub/Sub** | Asynchronous ingestion topic (`needflare-reports`) |
-| **Persistent State** | **Google Cloud Firestore** | Enterprise Native database (`needflare-db`) for reports and tasks |
+| **Persistent State** | **Google Cloud Firestore** | Enterprise Native database (`needflare-db`) for reports, tasks, and visual guides |
 | **Serverless Runtime** | **Google Cloud Run** | Scalable, containerized agent server (`needflare-agent`) |
 | **Frontend UI** | **React 19 + TypeScript + Vite** | Tactical coordinator map, Leaflet grid, volunteer edge terminal |
 
@@ -72,29 +72,10 @@ All foundational Google Cloud infrastructure resources for this platform are pro
 - **Database ID:** `needflare-db`
 - **Mode:** `FIRESTORE_NATIVE`
 - **Location:** `us-central1`
-- **Collections:** `reports`, `tasks`
+- **Collections:** `reports`, `tasks`, `veo_guides`
 
 ### 4. Secret Manager
 - **Secret:** `GEMINI_API_KEY` (securely mounted for Cloud Run runtime)
-
-### 5. Google AI Models Integrated
-- `gemini-3.7-flash` (Autonomous triage, tool execution & Copilot)
-- `gemma-4-26b-a4b-it` (Edge PII sanitization & triage classification)
-- `veo-3.1-fast-generate-preview` (Universal instructional survival video generation)
-
-#### Edge-First Hybrid Architecture (Local-First + Cloud AI)
-NeedFlare operates in two resilient modes during disaster scenarios:
-
-1. **Online Mode (Network Connected):**
-   Reports are classified in real-time via Google's hosted **Gemma 4** (`gemma-4-26b-a4b-it`) model endpoint for high-precision category and urgency triage.
-
-2. **Offline Mode (Disaster Blackout):**
-   When connectivity drops, the application seamlessly falls back to 100% on-device processing:
-   - Client-side PII sanitization removes names, phone numbers, and exact addresses directly on the volunteer's device before any transmission.
-   - Reports are stored in a local, encrypted offline store-and-forward buffer.
-   - Once connectivity (cellular, LoRa, or satellite) is restored, reports burst-sync to Google Cloud Pub/Sub.
-
-This **Local-First** design ensures total operational continuity with zero data leakage in critical field conditions.
 
 ---
 
@@ -192,6 +173,32 @@ For 6 trapped / isolated citizens, standard emergency water allocations are calc
    - 1 pack of Aquatabs / water purification tablets (sufficient for 100+ L)
    - 12 packets of Oral Rehydration Salts (ORS) / electrolytes
 ```
+
+---
+
+## 🧠 Google AI Ecosystem: Gemini 3.7 Flash, Gemma 4 & Google Veo 3.1
+
+NeedFlare tightly integrates three state-of-the-art Google AI models into an end-to-end disaster response lifecycle:
+
+### 1. Gemini 3.7 Flash — Autonomous Taskmaster & Reasoning Agent
+- **Role:** Autonomous triage reasoning, humanitarian ration calculations (Sphere standards), and multi-tool orchestration via Google GenKit.
+- **Workflow:** Ingests Pub/Sub messages asynchronously, evaluates sector risk levels, generates actionable task dispatches (`task-genkit-...`), and proactively executes tactical tools without human dispatch bottlenecks.
+- **Disaster Copilot:** Powers the interactive coordinator assistant for conversational crisis queries and real-time operational advice.
+
+### 2. Google Gemma 4 (`models/gemma-4-26b-a4b-it`) — Edge PII Sanitization & Hybrid Triage
+- **Role:** Autonomous edge-level privacy protection and rapid priority classification directly in the volunteer terminal.
+- **Architecture:**
+  - **Online Mode:** Calls Google's hosted `gemma-4-26b-a4b-it:generateContent` endpoint for high-precision category (`medical`, `water`, `shelter`, `food`, `rescue`, `power`) and urgency scoring.
+  - **Offline/Blackout Mode:** Executes client-side regex heuristics to scrub names, phone numbers, and coordinates directly on the volunteer's device before queuing to encrypted local store-and-forward storage.
+- **Latency & Reliability:** Robust JSON extraction prevents parsing exceptions; live edge latency is benchmarked and displayed directly in the UI.
+
+### 3. Google Veo 3.1 Fast (`models/veo-3.1-fast-generate-preview`) — Universal Non-Verbal Visual Guides
+- **Role:** Rapid synthesis of zero-text, high-contrast instructional survival video broadcasts for disaster victims facing panic or language barriers.
+- **Workflow:**
+  1. **Trigger:** Coordinator or autonomous agent requests protocol generation via `POST /api/veo/generate`.
+  2. **Rendering:** Veo 3.1 Fast synthesizes an 8-second instructional video via `predictLongRunning` (~30–50s rendering latency).
+  3. **Cloud Persistence:** Server polls the operation status, streams the verified MP4, and registers the protocol in **Google Cloud Firestore** (`veo_guides` collection).
+  4. **Gallery Player:** Displays real-time looping video previews inside tactical cards and provides full playback via HTML5 `<video>` player with active ON AIR broadcasting toggles.
 
 ---
 
