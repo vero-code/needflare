@@ -79,8 +79,22 @@ All foundational Google Cloud infrastructure resources for this platform are pro
 
 ### 5. Google AI Models Integrated
 - `gemini-3.7-flash` (Autonomous triage, tool execution & Copilot)
-- `gemma-2-9b-it` / On-device Gemma (Edge PII sanitization & triage classification)
-- `veo-3.1-generate-preview` (Universal instructional survival video generation)
+- `gemma-4-26b-a4b-it` (Edge PII sanitization & triage classification)
+- `veo-3.1-fast-generate-preview` (Universal instructional survival video generation)
+
+#### Edge-First Hybrid Architecture (Local-First + Cloud AI)
+NeedFlare operates in two resilient modes during disaster scenarios:
+
+1. **Online Mode (Network Connected):**
+   Reports are classified in real-time via Google's hosted **Gemma 4** (`gemma-4-26b-a4b-it`) model endpoint for high-precision category and urgency triage.
+
+2. **Offline Mode (Disaster Blackout):**
+   When connectivity drops, the application seamlessly falls back to 100% on-device processing:
+   - Client-side PII sanitization removes names, phone numbers, and exact addresses directly on the volunteer's device before any transmission.
+   - Reports are stored in a local, encrypted offline store-and-forward buffer.
+   - Once connectivity (cellular, LoRa, or satellite) is restored, reports burst-sync to Google Cloud Pub/Sub.
+
+This **Local-First** design ensures total operational continuity with zero data leakage in critical field conditions.
 
 ---
 
