@@ -14,10 +14,17 @@ export const VeoBroadcastGallery: React.FC<VeoBroadcastGalleryProps> = ({
   onAddGuide,
   onToggleBroadcast,
 }) => {
+  const categoryPrompts: Record<NeedCategory, string> = {
+    water: 'Rapid instructional, zero text, high contrast, clear hands: Demonstrating how to use charcoal, fabric, and sand to purify floodwater step-by-step.',
+    medical: 'Rapid instructional, zero language, universal first aid: Applying direct cloth pressure to bleeding wound, wrapping elastic bandage tightly with lock knot.',
+    shelter: 'Step-by-step visual survival guide, clear motions: Unfolding silver mylar emergency blanket, wrapping reflective shiny side inwards, securing corners with cord.',
+    food: 'Rapid instructional, zero text: Adding water to flameless ration heater bag, inserting meal pouch, resting on incline for exothermic heating.',
+    rescue: 'High-contrast SAR protocol, clear visual signal: Survivors laying out orange V-sign on roof, securing life vests, signaling rescue aircraft with reflective marker.',
+    power: 'Ultra-clear visual protocol: Unfolding solar panel towards sunlight, connecting USB cable to handheld radio, observing battery charging LED.',
+  };
+
   const [selectedCategory, setSelectedCategory] = useState<NeedCategory>('water');
-  const [customPrompt, setCustomPrompt] = useState<string>(
-    'Cinematic 4K instructional video, no text: Demonstrating how to use charcoal, fabric, and sand to purify floodwater step-by-step.'
-  );
+  const [customPrompt, setCustomPrompt] = useState<string>(categoryPrompts.water);
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [activeGuideModal, setActiveGuideModal] = useState<VeoVisualGuide | null>(null);
 
@@ -57,7 +64,13 @@ export const VeoBroadcastGallery: React.FC<VeoBroadcastGalleryProps> = ({
         <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '0.5rem' }}>
           <select
             value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value as NeedCategory)}
+            onChange={(e) => {
+              const cat = e.target.value as NeedCategory;
+              setSelectedCategory(cat);
+              if (categoryPrompts[cat]) {
+                setCustomPrompt(categoryPrompts[cat]);
+              }
+            }}
             style={{ padding: '8px', borderRadius: '6px', background: '#1e293b', color: '#fff', border: '1px solid #334155' }}
           >
             <option value="water">Water Purification</option>
