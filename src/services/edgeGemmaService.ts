@@ -130,7 +130,7 @@ export class EdgeGemmaService {
     
     try {
       const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemma-3-27b-it:generateContent?key=${GEMMA_API_KEY}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemma-4-26b-a4b-it:generateContent?key=${GEMMA_API_KEY}`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -143,12 +143,14 @@ Respond with: {"category": "water|medical|food|shelter|rescue|power", "urgency":
           })
         }
       );
+
       const data = await res.json();
-      const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
-      const parsed = JSON.parse(raw.replace(/```json|```/g, '').trim());
+      const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      const jsonMatch = raw.match(/\{[\s\S]*?\}/);
+      const parsed = jsonMatch ? JSON.parse(jsonMatch[0]) : {};
       const latencyMs = Date.now() - t0;
-      this.lastClassificationMeta = { model: 'Gemma 3-27B-IT', latencyMs };
-      return { category: parsed.category || 'water', urgency: parsed.urgency || 'medium', latencyMs };
+      this.lastClassificationMeta = { model: 'Gemma 4 Edge (Real AI)', latencyMs };
+      return { category: parsed.category || 'medical', urgency: parsed.urgency || 'critical', latencyMs };
     } catch {
       // Fallback to regex
       const latencyMs = Date.now() - t0;
