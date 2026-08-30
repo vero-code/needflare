@@ -119,8 +119,17 @@ export const VeoBroadcastGallery: React.FC<VeoBroadcastGalleryProps> = ({
               }}
             >
               {/* Thumbnail Header */}
-              <div style={{ position: 'relative', height: '140px', background: '#020617' }}>
-                {guide.thumbnailUrl ? (
+              <div style={{ position: 'relative', height: '140px', background: '#020617', overflow: 'hidden' }}>
+                {guide.videoUrl ? (
+                  <video
+                    src={guide.videoUrl}
+                    muted
+                    autoPlay
+                    loop
+                    playsInline
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.85 }}
+                  />
+                ) : guide.thumbnailUrl ? (
                   <img
                     src={guide.thumbnailUrl}
                     alt={guide.title}
