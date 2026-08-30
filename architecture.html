@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NeedFlare Architecture Diagram</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 2rem;
+      background: #0b0f19;
+      color: #f8fafc;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .header h1 {
+      margin: 0 0 0.5rem 0;
+      font-size: 1.8rem;
+      background: linear-gradient(135deg, #a78bfa, #38bdf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .header p {
+      margin: 0;
+      color: #94a3b8;
+      font-size: 0.95rem;
+    }
+    .diagram-container {
+      background: #0f172a;
+      padding: 2.5rem;
+      border-radius: 16px;
+      border: 1px solid #334155;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+      max-width: 1100px;
+      width: 100%;
+    }
+    .mermaid {
+      display: flex;
+      justify-content: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>NeedFlare System Architecture</h1>
+    <p>Google Cloud: All Things Agentic Hackathon — The Taskmaster Track</p>
+  </div>
+
+  <div class="diagram-container">
+    <div class="mermaid">
+flowchart TD
+    subgraph Edge ["📱 Edge Layer (Field Volunteers)"]
+        A["Volunteer Mobile App<br/>(React 19 + TypeScript)"]
+        B["Google Gemma 4 Edge<br/>PII Scrub + Classification<br/>(On-device regex fallback)"]
+        C["Offline Queue Buffer<br/>(IndexedDB / LocalStorage)"]
+        A -->|"Draft Incident Report"| B
+        B -->|"Sanitized & Classified"| C
+    end
+
+    subgraph Sync ["📡 Burst Transmission Tier"]
+        T["Sync Pipeline<br/>(LoRa Mesh / 4G / Satellite)"]
+        C -->|"Burst Sync on Reconnect"| T
+    end
+
+    subgraph Cloud ["☁️ Google Cloud Platform (us-central1)"]
+        CR["Google Cloud Run<br/>NeedFlare Agent Server (Express + GenKit)"]
+        T -->|"POST /api/reports/batch-sync"| CR
+
+        PS[("Cloud Pub/Sub<br/>Topic: needflare-reports")]
+        FS[("Cloud Firestore<br/>needflare-db (reports, tasks, veo_guides)")]
+        G37["Gemini 3.7 Flash<br/>Autonomous Triage Agent (needflareTriageFlow)"]
+
+        CR -->|"1. Publish Event"| PS
+        CR -->|"2. Persist State"| FS
+        CR -->|"3. Trigger Reasoning Loop"| G37
+
+        subgraph Tools ["🛠️ Autonomous Multi-Tool Execution"]
+            T1["triageSectorTool<br/>Assess threat & calculate Sphere rations"]
+            T2["createLogisticsTaskTool<br/>Auto-dispatch supply convoy to Firestore"]
+            T3["triggerVeoVisualGuideTool<br/>Google Veo 3.1 Fast survival video protocol"]
+        end
+
+        G37 --> T1
+        G37 --> T2
+        G37 --> T3
+        T3 -->|"Persist Video & Protocol"| FS
+    end
+
+    subgraph Command ["🖥️ Incident Command Tier"]
+        CD["Coordinator Tactical Dashboard<br/>(Real-Time Leaflet Grid + Logistics Queue + Veo Gallery)"]
+        FS -.->|"Real-Time Snapshot Sync"| CD
+    end
+
+    style Edge fill:#131d38,stroke:#3b82f6,stroke-width:1.5px,color:#fff
+    style Sync fill:#172554,stroke:#60a5fa,stroke-width:1.5px,color:#fff
+    style Cloud fill:#1e1b4b,stroke:#8b5cf6,stroke-width:2px,color:#fff
+    style Tools fill:#0f172a,stroke:#a855f7,stroke-width:1.5px,color:#fff
+    style Command fill:#064e3b,stroke:#10b981,stroke-width:1.5px,color:#fff
+    </div>
+  </div>
+
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark',
+      themeVariables: {
+        darkMode: true,
+        background: '#0f172a',
+        primaryColor: '#1e293b',
+        primaryTextColor: '#f8fafc',
+        primaryBorderColor: '#8b5cf6',
+        lineColor: '#38bdf8',
+        secondaryColor: '#0f172a',
+        tertiaryColor: '#1e293b'
+      }
+    });
+  </script>
+</body>
+</html>

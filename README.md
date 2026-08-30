@@ -25,19 +25,49 @@ In catastrophic disaster zones (hurricanes, earthquakes, flash floods), cellular
 
 ## 🏗️ Architecture
 
-```
-[Field Volunteers] ──(Edge Gemma 4)──► [Offline Queue] ──► [Cloud Pub/Sub: needflare-reports]
-                                                                  │
-                                                                  ▼
-[Coordinator Dashboard] ◄── [Firestore: needflare-db] ◄── [Cloud Run: NeedFlare Agent]
-   (Live Tactical Map)                                            │
-                                                       (Gemini 3.7 Flash)
-                                                       ├── triageSectorTool
-                                                       ├── createLogisticsTaskTool
-                                                       └── triggerVeoVisualGuideTool
-                                                                  │
-                                                                  ▼
-                                                   [Google Veo 3.1 Fast Broadcast]
+```mermaid
+flowchart TD
+    subgraph Edge ["📱 Edge Layer (Field Volunteers)"]
+        A["Volunteer Mobile App<br/>(React 19 + TypeScript)"]
+        B["Google Gemma 4 Edge<br/>PII Scrub + Classification<br/>(On-device regex fallback)"]
+        C["Offline Queue Buffer<br/>(IndexedDB / LocalStorage)"]
+        A -->|"Draft Incident Report"| B
+        B -->|"Sanitized & Classified"| C
+    end
+
+    subgraph Sync ["📡 Burst Transmission Tier"]
+        T["Sync Pipeline<br/>(LoRa Mesh / 4G / Satellite)"]
+        C -->|"Burst Sync on Reconnect"| T
+    end
+
+    subgraph Cloud ["☁️ Google Cloud Platform (us-central1)"]
+        CR["Google Cloud Run<br/>NeedFlare Agent Server (Express + GenKit)"]
+        T -->|"POST /api/reports/batch-sync"| CR
+
+        PS[("Cloud Pub/Sub<br/>Topic: needflare-reports")]
+        FS[("Cloud Firestore<br/>needflare-db (reports, tasks, veo_guides)")]
+        G37["Gemini 3.7 Flash<br/>Autonomous Triage Agent (needflareTriageFlow)"]
+
+        CR -->|"1. Publish Event"| PS
+        CR -->|"2. Persist State"| FS
+        CR -->|"3. Trigger Reasoning Loop"| G37
+
+        subgraph Tools ["🛠️ Autonomous Multi-Tool Execution"]
+            T1["triageSectorTool<br/>Assess threat & calculate Sphere rations"]
+            T2["createLogisticsTaskTool<br/>Auto-dispatch supply convoy to Firestore"]
+            T3["triggerVeoVisualGuideTool<br/>Google Veo 3.1 Fast survival video protocol"]
+        end
+
+        G37 --> T1
+        G37 --> T2
+        G37 --> T3
+        T3 -->|"Persist Video & Protocol"| FS
+    end
+
+    subgraph Command ["🖥️ Incident Command Tier"]
+        CD["Coordinator Tactical Dashboard<br/>(Real-Time Leaflet Grid + Logistics Queue + Veo Gallery)"]
+        FS -.->|"Real-Time Snapshot Sync"| CD
+    end
 ```
 
 ---
