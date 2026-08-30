@@ -1,5 +1,6 @@
 ﻿import React from 'react';
 import { ShieldCheck, Lock, CheckCircle2, X, EyeOff } from 'lucide-react';
+import { EdgeGemmaService } from '../services/edgeGemmaService';
 
 interface PiiInspectorModalProps {
   isOpen: boolean;
@@ -56,9 +57,25 @@ export const PiiInspectorModal: React.FC<PiiInspectorModalProps> = ({ isOpen, on
               <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: '#f8fafc' }}>
                 On-Device PII Sanitization Protocol
               </h3>
-              <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
-                Gemma 3 Edge Engine · Zero-Leakage Architecture
-              </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '2px', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+                  Gemma 3 Edge Engine · Zero-Leakage Architecture
+                </span>
+                <span
+                  style={{
+                    fontSize: '0.7rem',
+                    background: '#0284c720',
+                    color: '#38bdf8',
+                    border: '1px solid #38bdf850',
+                    padding: '2px 8px',
+                    borderRadius: '4px',
+                    fontFamily: 'monospace',
+                    fontWeight: 700,
+                  }}
+                >
+                  Classification: {EdgeGemmaService.lastClassificationMeta.model} · Latency: {EdgeGemmaService.lastClassificationMeta.latencyMs}ms
+                </span>
+              </div>
             </div>
           </div>
           <button

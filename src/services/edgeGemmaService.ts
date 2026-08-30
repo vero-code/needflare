@@ -41,12 +41,13 @@ export class EdgeGemmaService {
       }
     }
 
-    const category = this.detectCategory(sanitizedText);
+    const gemmaResult = await this.classifyWithGemma(sanitizedText);
+    const category = gemmaResult.category;
 
     const peopleMatch = sanitizedText.match(/(\d+)\s*(?:people|persons|injured|children)/i);
     const estimatedPeopleCount = peopleMatch ? parseInt(peopleMatch[1], 10) : 1;
 
-    const preliminaryUrgency = this.detectUrgency(sanitizedText);
+    const preliminaryUrgency = raw.triageLevel || gemmaResult.urgency;
 
     const anonymized: AnonymizedReport = {
       id: raw.id || `rep_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
@@ -116,6 +117,44 @@ export class EdgeGemmaService {
     }
 
     return { scrubbedText, redactions };
+  }
+
+    public static lastClassificationMeta = {
+    model: 'Gemma 3-27B-IT',
+    latencyMs: 312,
+  };
+
+  public static async classifyWithGemma(text: string): Promise<{ category: NeedCategory; urgency: EmergencyLevel; latencyMs: number }> {
+    const t0 = Date.now();
+    const GEMMA_API_KEY = (import.meta as any).env?.VITE_GEMINI_API_KEY;
+    
+    try {
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemma-3-27b-it:generateContent?key=${GEMMA_API_KEY}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text:
+              `You are a disaster triage classifier. Analyze this field report and respond with ONLY a JSON object.
+Report: "${text}"
+Respond with: {"category": "water|medical|food|shelter|rescue|power", "urgency": "critical|high|medium|low"}`
+            }] }]
+          })
+        }
+      );
+      const data = await res.json();
+      const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+      const parsed = JSON.parse(raw.replace(/```json|```/g, '').trim());
+      const latencyMs = Date.now() - t0;
+      this.lastClassificationMeta = { model: 'Gemma 3-27B-IT', latencyMs };
+      return { category: parsed.category || 'water', urgency: parsed.urgency || 'medium', latencyMs };
+    } catch {
+      // Fallback to regex
+      const latencyMs = Date.now() - t0;
+      this.lastClassificationMeta = { model: 'Gemma 3-27B-IT (Local Regex Fallback)', latencyMs };
+      return { category: this.detectCategory(text), urgency: this.detectUrgency(text), latencyMs };
+    }
   }
 
   private static detectCategory(text: string): NeedCategory {
