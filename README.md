@@ -11,6 +11,16 @@
 
 ---
 
+## 📺 Video Demonstration
+
+Watch the complete 3-minute technical walkthrough showing the autonomous background agent, edge PII scrub, Pub/Sub burst sync, and Google Veo survival broadcast synthesis:
+
+[![NeedFlare YouTube Walkthrough](https://img.youtube.com/vi/4tsuo_eSNvw/maxresdefault.jpg)](https://youtu.be/4tsuo_eSNvw)
+
+👉 **[Watch Video Demo](https://youtu.be/4tsuo_eSNvw)**
+
+---
+
 ## 🌟 Overview
 
 In catastrophic disaster zones (hurricanes, earthquakes, flash floods), cellular networks collapse and emergency dispatchers are overwhelmed with fragmented, panic-driven field messages containing sensitive personally identifiable information (PII).
@@ -92,6 +102,9 @@ flowchart TD
 | **Persistent State** | **Google Cloud Firestore** | Enterprise Native database (`needflare-db`) for reports, tasks, and visual guides |
 | **Serverless Runtime** | **Google Cloud Run** | Scalable, containerized agent server (`needflare-agent`) |
 | **Frontend UI** | **React 19 + TypeScript + Vite** | Tactical coordinator map, Leaflet grid, volunteer edge terminal |
+| **UI/UX Prototyping** | **Google AI Studio** | Structural layout scaffolding & component wireframes |
+
+> 🎨 **UI/UX Architecture Note:** **Google AI Studio** was utilized during early conceptual design to explore and scaffold the structural layout and wireframe positioning of dashboard elements.
 
 ---
 

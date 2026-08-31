@@ -398,7 +398,7 @@ export const OfflineSyncQueue: React.FC<OfflineSyncQueueProps> = ({
                   Headcount: <strong style={{ color: '#f1f5f9' }}>{rep.estimatedPeopleCount}</strong> | Category: <strong style={{ color: '#38bdf8' }}>{rep.category.toUpperCase()}</strong>
                 </span>
                 <span>
-                  Volunteer Terminal: <strong>VOL-ALPHA-77</strong> | {new Date(rep.timestamp).toLocaleTimeString()}
+                  Volunteer Terminal: <strong>{(typeof window !== 'undefined' && sessionStorage.getItem('needflare_callsign')) || 'VOL-ALPHA-77'}</strong> | {new Date(rep.timestamp).toLocaleTimeString()}
                 </span>
               </div>
             </div>
